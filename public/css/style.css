@@ -94,7 +94,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 }
 .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 #18113d, inset 0 0 0 2px rgba(255,255,255,.14); }
 .btn:disabled { opacity: .5; cursor: default; }
-.btn.small { min-height: 40px; padding: 6px 12px; font-size: .92em; border-radius: 12px; }
+.btn.small { min-height: 44px; padding: 6px 12px; font-size: .92em; border-radius: 12px; }
 .btn.ghost { background: transparent; box-shadow: inset 0 0 0 2px rgba(255,255,255,.3); }
 .btn.ghost:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 0 0 2px rgba(255,255,255,.3); }
 .b-pink { background: var(--pink) !important; color: #fff; box-shadow: 0 5px 0 var(--pink-d), inset 0 0 0 2px rgba(255,255,255,.25) !important; }
