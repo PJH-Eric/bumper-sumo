@@ -80,7 +80,7 @@
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
   function arenaRadiusFor(count, teams) {
-    return (count >= 5 || teams) ? 11 : 9;
+    return (count >= 5 || teams) ? 9 : 7.5;
   }
 
   /** 縮圈：開局 10 秒後等速縮，80 秒縮到 minRatio 後停住 */
@@ -150,7 +150,9 @@
         minRatio: sessionLevel === 'kid' ? 0.4 : 0.25,
         noBadItems: sessionLevel === 'kid',
         duration: o.duration || C.DURATION,
-        theme: o.theme == null ? 0 : o.theme
+        theme: o.theme == null ? 0 : o.theme,
+        /* 線上客戶端預測用：只預測移動與碰撞，出局、道具、勝負一律等伺服器 */
+        predict: !!o.predict
       },
       arena: { r0: r0, r: r0 },
       cars: [],
@@ -234,7 +236,7 @@
 
   function useItem(s, c) {
     var type = c.item;
-    if (!type) return;
+    if (!type || s.opts.predict) return;
     c.item = null;
     c.stats.items.push(type);
     emit(s, { type: 'use', id: c.id, item: type, x: c.x, y: c.y });
@@ -256,7 +258,7 @@
 
   /* ---------- 出局 ---------- */
   function knockOut(s, c, reason) {
-    if (!c.alive) return;
+    if (!c.alive || s.opts.predict) return;
     c.alive = false;
     c.outAt = s.t;
     c.wobble = 0;
@@ -502,7 +504,7 @@
       if (vo > 0) { c.vx -= vo * nx; c.vy -= vo * ny; }
       c.vx *= 0.8; c.vy *= 0.8;
       if (s.t >= C.SPAWN_SAFE) c.wobble -= DT;
-      if (c.wobble <= 0) { c.wobble = 0; knockOut(s, c, 'edge'); }
+      if (c.wobble <= 0) { c.wobble = s.opts.predict ? 0.01 : 0; knockOut(s, c, 'edge'); }
       return;
     }
     if (d > r) {
@@ -540,20 +542,21 @@
     c.x = Math.cos(g.theta) * rg; c.y = Math.sin(g.theta) * rg;
     if (g.cd > 0) g.cd = Math.max(0, g.cd - DT);
     if (c.input.item) {
-      if (g.cd <= 0 && ghostActive(s) && s.items.length < C.ITEM_TOTAL_MAX) {
+      if (!s.opts.predict && g.cd <= 0 && ghostActive(s) && s.items.length < C.ITEM_TOTAL_MAX) {
         var land = Math.max(0, s.arena.r - (2 + rand(s)));
         var it = { id: ++s.seq, x: Math.cos(g.theta) * land, y: Math.sin(g.theta) * land, ghost: true, age: 0, from: c.id };
         s.items.push(it);
         g.cd = C.GHOST_CD;
         c.stats.ghostDrops++;
-        emit(s, { type: 'ghostDrop', id: c.id, x: it.x, y: it.y, fromX: c.x, fromY: c.y });
+        var vr = Math.min(s.arena.r0 + 1.4, s.arena.r + 1.5);
+        emit(s, { type: 'ghostDrop', id: c.id, x: it.x, y: it.y, fromX: Math.cos(g.theta) * vr, fromY: Math.sin(g.theta) * vr });
       }
     }
   }
 
   /* ---------- 結束與名次 ---------- */
   function checkEnd(s) {
-    if (!s.opts.timed) return;
+    if (!s.opts.timed || s.opts.predict) return;
     var alive = aliveCars(s);
     var done = false, reason = null;
     if (s.opts.teams) {
@@ -715,7 +718,7 @@
     }
 
     /* 6. 道具：生成、撿取、被縮圈吃掉 */
-    if (s.opts.items) {
+    if (s.opts.items && !s.opts.predict) {
       if (s.opts.timed) {
         if (s.t >= s.nextItem) {
           s.nextItem += C.ITEM_EVERY;
@@ -745,6 +748,15 @@
     for (i = 0; i < cars.length; i++) { cars[i].input.dash = false; cars[i].input.item = false; }
     checkEnd(s);
     return s;
+  }
+
+  /** 線上：離開或斷線逾時 → 直接出局變幽靈，不算任何人的撞飛數 */
+  function forfeit(s, id) {
+    var c = getCar(s, id);
+    if (!c || !c.alive || s.phase === 'over') return;
+    c.lastHit = null;
+    knockOut(s, c, 'leave');
+    checkEnd(s);
   }
 
   /* ---------- 練習模式工具 ---------- */
@@ -828,7 +840,7 @@
     createMatch: createMatch, step: step, setInput: setInput, getCar: getCar,
     aliveCars: aliveCars, radiusAt: radiusAt, result: result, finish: finish,
     ghostActive: ghostActive, rand: rand, hashSeed: hashSeed, len: len,
-    practiceGive: practiceGive, practiceReset: practiceReset, practiceRespawn: practiceRespawn,
+    practiceGive: practiceGive, forfeit: forfeit, practiceReset: practiceReset, practiceRespawn: practiceRespawn,
     snapshot: snapshot, applySnapshot: applySnapshot, arenaRadiusFor: arenaRadiusFor
   };
 }));

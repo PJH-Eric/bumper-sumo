@@ -14,7 +14,7 @@
 
   var P = {
     kid:    { ms: 300, noise: 0.7,  rescue: 0.3,  safe: 0.55, dashP: 0.12, lead: 0,    reach: 2.2, dodge: 0,    items: 0.15, edgeAware: 0.2, sideStep: 0 },
-    easy:   { ms: 250, noise: 0.4,  rescue: 0.65, safe: 1.1,  dashP: 0.75, lead: 0,    reach: 3.3, dodge: 0,    items: 0.5,  edgeAware: 0,   sideStep: 0 },
+    easy:   { ms: 250, noise: 0.4,  rescue: 0.85, safe: 1.1,  dashP: 0.75, lead: 0,    reach: 3.3, dodge: 0,    items: 0.5,  edgeAware: 0,   sideStep: 0 },
     normal: { ms: 150, noise: 0.2,  rescue: 1,    safe: 0.74, dashP: 0.9,  lead: 0.12, reach: 3.2, dodge: 0.25, items: 0.8,  edgeAware: 1,   sideStep: 0.2 },
     hard:   { ms: 110, noise: 0.12, rescue: 1,    safe: 0.68, dashP: 1,    lead: 0.25, reach: 3.4, dodge: 0.7,  items: 1,    edgeAware: 1,   sideStep: 0.7 },
     mythic: { ms: 80,  noise: 0.05, rescue: 1,    safe: 0.68, dashP: 1,    lead: 0.25, reach: 3.4, dodge: 0.8,  items: 1,    edgeAware: 1,   sideStep: 0.7 }

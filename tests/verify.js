@@ -16,7 +16,7 @@ function match(n, extra) {
   return R.createMatch(Object.assign({ seed: 'test', cars, items: false, countdown: 0 }, extra || {}));
 }
 /* 把所有車停在擂台下方一排（在場內、不互相碰到），測試再各自擺位置 */
-function park(s) { s.cars.forEach((c, i) => { c.x = -3 + i * 1.3; c.y = -5; c.vx = c.vy = 0; }); }
+function park(s) { s.cars.forEach((c, i) => { c.x = -2.5 + i * 1.3; c.y = -1.7; c.vx = c.vy = 0; }); }
 function evts(s, type) { return s.events.filter((e) => e.type === type); }
 function runCollect(s, n, type) { const out = []; stepN(s, n, () => {}); return out; }
 
@@ -94,7 +94,7 @@ function hitTest(dash) {
   ok(near(R.radiusAt(s, 80), s.arena.r0 * 0.25) && near(R.radiusAt(s, 89), s.arena.r0 * 0.25), '80 秒縮到 25% 後停住');
   const k = match(2, { sessionLevel: 'kid' });
   ok(near(R.radiusAt(k, 85), k.arena.r0 * 0.4), '幼幼本局難度縮到 40%');
-  ok(match(3).arena.r0 === 9 && match(5).arena.r0 === 11, '擂台大小 2～4 人 9、5～6 人 11');
+  ok(match(3).arena.r0 === 7.5 && match(5).arena.r0 === 9, '擂台大小 2～4 人 7.5、5～6 人 9 車身');
 })();
 
 /* ---- 開局 2 秒內不會出界 ---- */
@@ -187,7 +187,7 @@ function hitTest(dash) {
   t.cars.forEach((c, i) => { c.x = 0; c.y = 0; });
   t.cars[0].x = 3; t.cars[1].x = 1; t.cars[2].x = -5; t.cars[0].y = t.cars[1].y = t.cars[2].y = 0;
   t.cars[0].stats.kos = 2; t.cars[1].stats.kos = 1; t.cars[2].stats.kos = 1;
-  t.t = 90 - 1 / 120; t.arena.r = 9;
+  t.t = 90 - 1 / 120; t.arena.r = 7.5;
   t.opts.shrink = false;
   R.step(t);
   ok(t.phase === 'over' && t.endReason === 'time', '90 秒時間到結束');
@@ -332,7 +332,7 @@ function hitTest(dash) {
 (function () {
   const cars = [{ id: 'a', team: 0 }, { id: 'b', team: 0 }, { id: 'c', team: 1 }, { id: 'd', team: 1 }];
   const s = R.createMatch({ seed: 't', cars, teams: true, countdown: 0, items: false });
-  ok(s.arena.r0 === 11, '組隊擂台半徑 11');
+  ok(s.arena.r0 === 9, '組隊擂台半徑 9');
   park(s); s.t = 3;
   const a = s.cars[0], b = s.cars[1];
   a.x = -1.2; a.y = 0; a.dash.phase = 'burst'; a.vx = 11; a.angle = 0; b.x = 0; b.y = 0;

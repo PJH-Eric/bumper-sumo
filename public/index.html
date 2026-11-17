@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1d1640">
+<title data-i18n-title="meta.title">碰碰車大亂鬥｜免費線上多人碰碰車對戰</title>
+<meta name="description" data-i18n-content="meta.desc" content="免費免下載的碰碰車大亂鬥！2～6 台可愛動物碰碰車擠在越縮越小的擂台上，衝刺把對手撞出場外。單機五段電腦、自由練習，也能線上多人對戰、觀戰聊天，手機平板觸控都好玩。">
+<!--SEO:HEAD-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap">
+<link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/lobby-chat.css">
+<link rel="stylesheet" href="css/latency.css">
+<link rel="stylesheet" href="css/server-outage.css">
+<script src="js/server-outage.js"></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- 全域工具列：語言（地球下拉）緊鄰設定 -->
+  <div class="topbar-global" id="topbar-global">
+    <div id="dd-lang" class="dd-lang"></div>
+    <button type="button" class="icon-btn" id="btn-settings" data-i18n-aria="settings.title">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== 首頁 ===== -->
+  <section class="screen" id="s-home" data-screen="home">
+    <a class="lobby-link" id="lobby-link" href="https://pjh-eric.github.io/game-lobby/">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span data-i18n="home.lobby">回遊戲大廳</span>
+    </a>
+    <canvas class="hero-cv" id="hero-cv" aria-hidden="true"></canvas>
+    <div class="home-scroll" data-scroll>
+      <div class="home-inner">
+        <header class="logo">
+          <h1 class="logo-title"><span data-i18n="game.name">碰碰車大亂鬥</span></h1>
+          <p class="logo-sub" data-i18n="home.tagline">把大家撞出場外，最後留下來的贏！</p>
+        </header>
+        <nav class="home-menu" data-i18n-aria="home.menu">
+          <button type="button" class="big-btn b-pink" id="btn-solo"><span class="bb-ico" data-ico="robot"></span><span><b data-i18n="home.solo">跟電腦玩</b><small data-i18n="home.soloSub">1～5 台電腦・五段難度</small></span></button>
+          <button type="button" class="big-btn b-cyan" id="btn-online"><span class="bb-ico" data-ico="globe"></span><span><b data-i18n="home.online">跟別人玩</b><small data-i18n="home.onlineSub">線上 2～6 人・觀戰聊天</small></span></button>
+          <button type="button" class="big-btn b-yellow" id="btn-practice"><span class="bb-ico" data-ico="target"></span><span><b data-i18n="home.practice">自由練習</b><small data-i18n="home.practiceSub">不計時・木頭靶車</small></span></button>
+          <button type="button" class="big-btn b-violet" id="btn-howto"><span class="bb-ico" data-ico="book"></span><span><b data-i18n="home.howto">怎麼玩</b><small data-i18n="home.howtoSub">衝刺、搶救、道具一次看懂</small></span></button>
+        </nav>
+        <button type="button" class="btn records-btn" id="btn-records"><span class="rb-ico" data-ico="trophy"></span><span data-i18n="rec.entry">紀錄與成就</span></button>
+        <p class="home-stats" id="home-stats"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 單機設定 ===== -->
+  <section class="screen" id="s-solo" data-screen="solo" hidden>
+    <header class="scr-head">
+      <button type="button" class="back-btn" data-back="home" data-i18n-aria="common.back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 data-i18n="solo.title">跟電腦玩</h2>
+    </header>
+    <div class="scr-body" data-scroll>
+      <div class="setup">
+        <section class="panel">
+          <h3 data-i18n="solo.pickCar">選你的碰碰車</h3>
+          <div class="car-grid" id="solo-cars" role="radiogroup" data-i18n-aria="solo.pickCar"></div>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="solo.cpus">電腦對手</h3>
+          <div class="row"><span class="row-label" data-i18n="solo.cpuCount">電腦數量</span><div id="solo-count"></div></div>
+          <ol class="cpu-list" id="solo-cpu-list"></ol>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="solo.rules">這局設定</h3>
+          <div class="row"><span class="row-label"><span data-i18n="solo.session">本局難度</span><small data-i18n="solo.sessionSub">決定你的邊緣搶救時間與擂台最後大小</small></span><div id="solo-session"></div></div>
+          <div class="row"><span class="row-label" data-i18n="solo.theme">擂台主題</span><div id="solo-theme"></div></div>
+          <div class="row"><span class="row-label"><span data-i18n="solo.items">道具</span><small data-i18n="solo.itemsSub">關掉時幽靈也不能丟道具</small></span><button type="button" class="sw" id="solo-items" aria-checked="true" data-i18n-aria="solo.items"></button></div>
+          <canvas class="theme-preview" id="solo-theme-cv" aria-hidden="true"></canvas>
+        </section>
+      </div>
+    </div>
+    <footer class="scr-foot">
+      <button type="button" class="big-btn b-pink go-btn" id="solo-start"><b data-i18n="solo.start">開始比賽！</b></button>
+    </footer>
+  </section>
+
+  <!-- ===== 線上大廳 ===== -->
+  <section class="screen" id="s-lobby" data-screen="lobby" hidden>
+    <header class="scr-head">
+      <button type="button" class="back-btn" data-back="home" data-i18n-aria="common.back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 data-i18n="lobby.title">線上大廳</h2>
+      <span class="online-n" id="lobby-online" role="status" hidden></span>
+      <span class="conn" id="lobby-conn" role="status"></span>
+    </header>
+    <div class="scr-body" data-scroll>
+      <div class="lobby">
+        <section class="panel invite-panel" id="invite-panel" hidden>
+          <h3 data-i18n="invite.title">你收到邀請了！</h3>
+          <p id="invite-desc"></p>
+          <div class="row"><label class="row-label" for="invite-name" data-i18n="lobby.name">暱稱</label><input class="txt" id="invite-name" maxlength="12" autocomplete="off" data-i18n-ph="lobby.namePh"></div>
+          <div class="btn-row">
+            <button type="button" class="btn b-pink" id="invite-join" data-i18n="invite.join">加入房間</button>
+            <button type="button" class="btn" id="invite-watch" data-i18n="invite.watch">觀戰</button>
+            <button type="button" class="btn ghost" id="invite-cancel" data-i18n="common.cancel">取消</button>
+          </div>
+          <p class="err" id="invite-err" role="alert"></p>
+        </section>
+        <section class="panel">
+          <div class="row"><label class="row-label" for="lobby-name" data-i18n="lobby.name">暱稱</label><input class="txt" id="lobby-name" maxlength="12" autocomplete="off" data-i18n-ph="lobby.namePh"></div>
+          <div class="row"><span class="row-label" data-i18n="lobby.car">我的車</span><div class="mini-cars" id="lobby-cars" role="radiogroup" data-i18n-aria="lobby.car"></div></div>
+          <div class="row"><span class="row-label"><span data-i18n="lobby.private">建立私人房間</span><small data-i18n="lobby.privateSub">不出現在房間列表，只能用房號或邀請連結進來</small></span><button type="button" class="sw" id="lobby-private" aria-checked="false" data-i18n-aria="lobby.private"></button></div>
+          <div class="btn-row">
+            <button type="button" class="btn b-pink" id="lobby-quick" data-i18n="lobby.quick">快速加入</button>
+            <button type="button" class="btn b-cyan" id="lobby-create" data-i18n="lobby.create">建立房間</button>
+            <button type="button" class="btn ghost" id="lobby-refresh" data-i18n="lobby.refresh">重新整理</button>
+          </div>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="lobby.rooms">房間列表</h3>
+          <div class="room-list" id="room-list" aria-live="polite"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 房間 ===== -->
+  <section class="screen" id="s-room" data-screen="room" hidden>
+    <header class="scr-head">
+      <button type="button" class="back-btn" id="room-leave" data-i18n-aria="room.leave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2><span id="room-title"></span> <small class="room-code" id="room-code"></small></h2>
+      <span class="conn" id="room-conn" role="status"></span>
+    </header>
+    <div class="scr-body" data-scroll>
+      <div class="room">
+        <p class="role-tag" id="room-role"></p>
+        <section class="panel">
+          <h3 data-i18n="room.seats">席位</h3>
+          <div class="seats" id="room-seats"></div>
+          <p class="hint" id="room-hint"></p>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="room.settings">房間設定</h3>
+          <div class="row"><span class="row-label" data-i18n="room.mode">模式</span><div id="room-mode"></div></div>
+          <div class="row"><span class="row-label" data-i18n="room.maxPlayers">人數上限</span><div id="room-max"></div></div>
+          <div class="row"><span class="row-label" data-i18n="solo.theme">擂台主題</span><div id="room-theme"></div></div>
+          <div class="row"><span class="row-label"><span data-i18n="room.private">私人房間</span><small data-i18n="lobby.privateSub">不出現在房間列表，只能用房號或邀請連結進來</small></span><button type="button" class="sw" id="room-private" aria-checked="false" data-i18n-aria="room.private"></button></div>
+          <div class="row"><span class="row-label" data-i18n="solo.items">道具</span><button type="button" class="sw" id="room-items" aria-checked="true" data-i18n-aria="solo.items"></button></div>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="room.invite">邀請朋友</h3>
+          <div class="invite-box"><span class="invite-url" id="room-invite-url"></span></div>
+          <div class="btn-row">
+            <button type="button" class="btn b-cyan" id="room-copy" data-i18n="room.copy">複製連結</button>
+            <button type="button" class="btn" id="room-share" data-i18n="room.shareLink">分享</button>
+            <button type="button" class="btn ghost" id="room-regen" data-i18n="room.regen">重發連結</button>
+          </div>
+          <p class="hint" data-i18n="room.inviteHint">重發後舊連結會失效。</p>
+        </section>
+      </div>
+    </div>
+    <footer class="scr-foot room-foot">
+      <button type="button" class="btn ghost" id="room-spectate" data-i18n="room.toSpectate">改去觀戰</button>
+      <button type="button" class="big-btn b-pink go-btn" id="room-ready"><b data-i18n="room.ready">準備好了</b></button>
+      <button type="button" class="big-btn b-yellow go-btn" id="room-start" hidden><b data-i18n="room.start">開始比賽</b></button>
+    </footer>
+  </section>
+
+  <!-- ===== 對局 ===== -->
+  <section class="screen" id="s-game" data-screen="game" hidden>
+    <div class="game-wrap">
+      <aside class="side" id="side" data-i18n-aria="game.side">
+        <button type="button" class="side-toggle" id="side-toggle" aria-expanded="true" aria-controls="side-body" data-i18n-aria="game.sideToggle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="unread" id="side-unread" hidden></span>
+        </button>
+        <div class="side-body" id="side-body">
+          <section class="summary" aria-live="polite">
+            <h3 data-i18n="game.summary">戰況</h3>
+            <p class="sum-status" id="sum-status"></p>
+            <ol class="rank" id="sum-rank"></ol>
+          </section>
+          <section class="chat" id="game-chat" hidden>
+            <h3 data-i18n="chat.title">聊天</h3>
+            <div class="chat-log" id="game-chat-log" data-scroll data-i18n-aria="chat.log"></div>
+            <div class="quick-phr" id="game-chat-quick"></div>
+            <form class="chat-form" id="game-chat-form">
+              <input class="txt" id="game-chat-input" maxlength="60" autocomplete="off" data-i18n-ph="chat.ph" data-i18n-aria="chat.ph">
+              <button type="submit" class="btn small" data-i18n="chat.send">送出</button>
+            </form>
+          </section>
+        </div>
+      </aside>
+      <div class="stage" id="stage">
+        <canvas id="game-cv" aria-label="" role="img"></canvas>
+        <div class="hud-top">
+          <button type="button" class="icon-btn hud-pause" id="btn-pause" data-i18n-aria="game.pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
+          <div class="hud-bar" id="hud-bar">
+            <span class="hud-time" id="hud-time" role="timer">90</span>
+            <span class="hud-alive" id="hud-alive"></span>
+          </div>
+          <span class="role-pill" id="hud-role" hidden></span>
+        </div>
+        <div class="ghost-tip" id="ghost-tip" hidden></div>
+        <div class="countdown" id="countdown" hidden aria-live="assertive"></div>
+        <div class="touch" id="touch">
+          <div class="joy-zone" id="joy-zone">
+            <div class="joy" id="joy"><div class="joy-base"></div><div class="joy-knob"></div></div>
+          </div>
+          <div class="tbtns">
+            <button type="button" class="tbtn tbtn-item" id="btn-item" data-i18n-aria="game.item"><canvas id="item-cv" width="96" height="96" aria-hidden="true"></canvas><span class="tbtn-key">E</span></button>
+            <button type="button" class="tbtn tbtn-dash" id="btn-dash" data-i18n-aria="game.dash"><svg class="cd-ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45"/><circle class="cd-arc" id="dash-arc" cx="50" cy="50" r="45"/></svg><span class="tbtn-label" id="dash-label" data-i18n="game.dash">衝刺</span><span class="tbtn-key" data-i18n="key.space">空白</span></button>
+          </div>
+        </div>
+        <div class="practice-bar" id="practice-bar" hidden>
+          <div class="pr-items" id="pr-items"></div>
+          <div class="pr-row">
+            <span class="row-label" data-i18n="practice.dummies">靶車</span><div id="pr-count"></div>
+            <button type="button" class="btn small" id="pr-reset" data-i18n="practice.reset">重新擺放</button>
+            <button type="button" class="btn small ghost" id="pr-exit" data-i18n="practice.exit">離開</button>
+          </div>
+        </div>
+        <div class="rotate-tip" id="rotate-tip" hidden><span data-i18n="game.rotate">轉成橫向比較好玩喔！</span><button type="button" class="btn small ghost" id="rotate-close" data-i18n="common.ok">知道了</button></div>
+
+        <!-- 結算：疊在擂台上 -->
+        <div class="result" id="result" hidden role="dialog" aria-modal="false" aria-labelledby="result-title">
+          <div class="result-card">
+            <h2 id="result-title"></h2>
+            <p class="result-sub" id="result-sub"></p>
+            <div class="result-new" id="result-new" aria-live="polite"></div>
+            <div class="result-scroll" data-scroll>
+              <ol class="podium" id="result-rows"></ol>
+              <dl class="my-stats" id="result-stats"></dl>
+            </div>
+            <div class="result-actions">
+              <button type="button" class="btn" id="res-share"><span data-i18n="result.share">分享結果</span></button>
+              <button type="button" class="big-btn b-pink" id="res-again"><b data-i18n="result.again">再來一局</b></button>
+              <button type="button" class="btn b-cyan" id="res-room" data-i18n="result.room">回到房間</button>
+              <button type="button" class="btn ghost" id="res-home" data-i18n="result.home">回到首頁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 紀錄與成就 ===== -->
+  <section class="screen" id="s-records" data-screen="records" hidden>
+    <header class="scr-head">
+      <button type="button" class="back-btn" data-back="home" data-i18n-aria="common.back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 data-i18n="rec.title">紀錄與成就</h2>
+    </header>
+    <div class="scr-body" data-scroll>
+      <div class="records" id="records"></div>
+    </div>
+  </section>
+
+  <!-- ===== 怎麼玩 ===== -->
+  <section class="screen" id="s-howto" data-screen="howto" hidden>
+    <header class="scr-head">
+      <button type="button" class="back-btn" data-back="home" data-i18n-aria="common.back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 data-i18n="home.howto">怎麼玩</h2>
+    </header>
+    <div class="scr-body" data-scroll>
+      <div class="howto" id="howto"></div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<!-- ===== 設定 ===== -->
+<div class="modal" id="m-settings" hidden role="dialog" aria-modal="true" aria-labelledby="set-title">
+  <div class="modal-card">
+    <header class="modal-head"><h2 id="set-title" data-i18n="settings.title">設定</h2><button type="button" class="icon-btn" data-close data-i18n-aria="common.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    <div class="modal-body" data-scroll>
+      <div class="set-row"><span class="row-label" data-i18n="settings.music">背景音樂</span><div id="set-music"></div></div>
+      <div class="set-row"><span class="row-label" data-i18n="settings.sfx">音效</span><div id="set-sfx"></div></div>
+      <div class="set-row"><span class="row-label"><span data-i18n="settings.shake">畫面震動</span></span><button type="button" class="sw" id="set-shake" data-i18n-aria="settings.shake"></button></div>
+      <div class="set-row"><span class="row-label"><span data-i18n="settings.colorBlind">色彩輔助</span><small data-i18n="settings.colorBlindSub">車身加上不同圖案</small></span><button type="button" class="sw" id="set-cb" data-i18n-aria="settings.colorBlind"></button></div>
+      <div class="set-row"><span class="row-label"><span data-i18n="settings.reduce">減少動態</span><small data-i18n="settings.reduceSub">關掉閃爍、粒子變少</small></span><button type="button" class="sw" id="set-reduce" data-i18n-aria="settings.reduce"></button></div>
+      <div class="set-row"><span class="row-label" data-i18n="settings.names">顯示名牌</span><button type="button" class="sw" id="set-names" data-i18n-aria="settings.names"></button></div>
+      <div class="set-row"><span class="row-label" data-i18n="settings.touchSize">觸控按鍵大小</span><div id="set-tsize"></div></div>
+      <div class="set-row"><span class="row-label" data-i18n="settings.touchAlpha">觸控按鍵透明度</span><div id="set-talpha"></div></div>
+      <div class="set-row"><span class="row-label"><span id="set-lobbychat-label">大廳聊天室</span><small id="set-lobbychat-sub"></small></span><button type="button" class="sw" id="set-lobbychat"></button></div>
+      <div class="set-row"><span class="row-label"><span data-i18n="rec.clear">清除紀錄與成就</span><small data-i18n="rec.clearSub">只存在這個瀏覽器，清除後無法復原</small></span><button type="button" class="btn small danger" id="b-clear-records" data-i18n="rec.clearBtn">清除</button></div>
+      <p class="hint keys-hint"><span data-i18n="settings.keys">鍵盤</span>：<kbd class="kc">W</kbd><kbd class="kc">A</kbd><kbd class="kc">S</kbd><kbd class="kc">D</kbd> / <kbd class="kc">↑</kbd><kbd class="kc">↓</kbd><kbd class="kc">←</kbd><kbd class="kc">→</kbd> <span data-i18n="key.move">移動</span>・<kbd class="kc wide" data-i18n="key.space">空白</kbd> <span data-i18n="game.dash">衝刺</span>・<kbd class="kc">E</kbd> <span data-i18n="game.item">道具</span>・<kbd class="kc wide">Esc</kbd> <span data-i18n="game.pause">暫停</span></p>
+    </div>
+    <footer class="modal-foot"><button type="button" class="btn ghost" id="b-settings-reset" data-i18n="settings.reset">恢復預設</button><button type="button" class="btn b-pink" data-close data-i18n="common.done">完成</button></footer>
+  </div>
+</div>
+
+<!-- ===== 暫停（單機）／選單（線上不暫停） ===== -->
+<div class="modal" id="m-pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
+  <div class="modal-card small">
+    <header class="modal-head"><h2 id="pause-title" data-i18n="game.paused">暫停</h2></header>
+    <div class="modal-body"><p class="hint" id="pause-note"></p></div>
+    <footer class="modal-foot col">
+      <button type="button" class="big-btn b-pink" id="pause-resume" data-close data-autofocus><b data-i18n="game.resume">繼續</b></button>
+      <button type="button" class="btn" id="pause-restart" data-i18n="game.restart">重新開始</button>
+      <button type="button" class="btn ghost" id="pause-quit" data-i18n="game.quit">離開這局</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ===== 分享結果 ===== -->
+<div class="modal" id="m-share" hidden role="dialog" aria-modal="true" aria-labelledby="share-title">
+  <div class="modal-card">
+    <header class="modal-head"><h2 id="share-title" data-i18n="share.title">分享結果</h2><button type="button" class="icon-btn" data-close data-i18n-aria="common.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    <div class="modal-body" data-scroll>
+      <div class="share-stage"><img class="share-img" id="share-img" alt="" hidden><p class="share-status" id="share-status" role="status"></p></div>
+    </div>
+    <footer class="modal-foot">
+      <button type="button" class="btn b-cyan" id="share-download" data-i18n="share.download">下載 PNG</button>
+      <button type="button" class="btn b-pink" id="share-image" data-i18n="share.image">分享圖片</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ===== 確認 ===== -->
+<div class="modal" id="m-confirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="modal-card small">
+    <header class="modal-head"><h2 id="confirm-title"></h2></header>
+    <div class="modal-body"><p id="confirm-text"></p></div>
+    <footer class="modal-foot"><button type="button" class="btn ghost" data-close id="confirm-no" data-i18n="common.cancel">取消</button><button type="button" class="btn b-pink" id="confirm-yes" data-autofocus data-i18n="common.ok">確定</button></footer>
+  </div>
+</div>
+
+<script src="js/analytics.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/locales.js"></script>
+<script src="js/locales-hans.js"></script>
+<script src="js/config.js"></script>
+<script src="js/rules.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/records.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/art.js"></script>
+<script src="js/render.js"></script>
+<script src="js/input.js"></script>
+<script src="js/share.js"></script>
+<script src="js/latency.js" data-skin="bumper-sumo"></script>
+<script src="js/lobby-chat.js"></script>
+<script src="js/net.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
