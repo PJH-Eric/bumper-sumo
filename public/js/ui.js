@@ -297,6 +297,7 @@
       var ch = view.clientHeight, sh = view.scrollHeight;
       var over = sh > ch + 1;
       node.classList.toggle('sa-over', over);
+      node.classList.toggle('sa-end', !over || view.scrollTop + view.clientHeight >= view.scrollHeight - 2);
       if (over) {
         var th = Math.max(28, ch * ch / sh);
         var top = (view.scrollTop / (sh - ch)) * (ch - th);

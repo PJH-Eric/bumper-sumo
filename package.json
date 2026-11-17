@@ -16,7 +16,7 @@
     "gen:hans": "node scripts/gen-hans.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": "^26.12.1"
   },
   "dependencies": {
     "express": "^4.21.2",

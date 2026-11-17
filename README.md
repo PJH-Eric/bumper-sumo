@@ -9,6 +9,8 @@ npm install
 npm start            # http://localhost:3250（Windows 也可以直接雙擊「啟動遊戲.bat」）
 ```
 
+需要 **Node.js 26.12.1 以上的 26.x**（`.nvmrc`、`package.json` engines、Render、GitHub Actions 都用 26）。「啟動遊戲.bat」會先用 PATH 上的 node；不是 26 時自動改用 nvm-windows 裝的 v26（`%NVM_HOME%\v26.*` 或 `%APPDATA%\nvm\v26.*`），找不到才提示安裝。已經在執行時再開一次只會幫你打開瀏覽器。
+
 首頁、單機、自由練習、紀錄、怎麼玩都不連後端；只有按「跟別人玩」或打開邀請連結才載入 Socket.IO 並連線，離開線上模式就斷線。
 
 ## 模式

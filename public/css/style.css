@@ -150,8 +150,9 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .kc.wide { min-width: 48px; }
 
 /* ---------- 捲動區（自訂捲軸） ---------- */
-.sa { position: relative; min-height: 0; overflow: hidden; }
-.sa-view { height: 100%; max-height: inherit; overflow: auto; scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+/* 捲動區用 flex 決定高度：父層是 flex 項目時 height:100% 算不出來，內容會被裁掉卻不能捲 */
+.sa { position: relative; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.sa-view { flex: 1 1 auto; min-height: 0; max-height: inherit; overflow: auto; scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .sa-view::-webkit-scrollbar { display: none; }
 .sa-track { position: absolute; top: 6px; bottom: 6px; right: 3px; width: 8px; border-radius: 4px; background: rgba(255,255,255,.08); opacity: 0; transition: opacity .2s; z-index: 5; }
 .sa-over > .sa-track:not(.sa-h) { opacity: 1; }
@@ -374,7 +375,9 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
 @keyframes rise { from { transform: translateY(30px) scale(.96); opacity: 0; } }
 .result-card h2 { margin: 0; text-align: center; font-size: clamp(1.6rem, 5vw, 2.4rem); color: var(--yellow); text-shadow: 0 3px 0 rgba(0,0,0,.4); }
 .result-sub { margin: 0; text-align: center; color: var(--muted); font-weight: 700; }
-.result-scroll { flex: 1 1 auto; min-height: 90px; }
+.result-scroll { position: relative; flex: 1 1 auto; min-height: 120px; }
+/* 內容超出時：底部漸層＋常駐自訂捲軸，看得出來可以往下捲 */
+.result-scroll.sa-over:not(.sa-end)::after { content: ""; position: absolute; left: 0; right: 14px; bottom: 0; height: 36px; pointer-events: none; background: linear-gradient(rgba(43,34,102,0), var(--panel)); border-radius: 0 0 12px 12px; }
 .result-card > :not(.result-scroll) { flex: none; }
 .podium { list-style: none; margin: 0; padding: 0 12px 0 0; display: grid; gap: 6px; }
 .podium li { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 14px; background: rgba(0,0,0,.2); font-weight: 800; }
@@ -386,13 +389,14 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
 .podium canvas { width: 40px; height: 40px; flex: none; }
 .podium .pn { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .podium .pk { color: var(--yellow); white-space: nowrap; }
-.my-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; margin: 10px 12px 0 0; }
-.my-stats div { padding: 6px 10px; border-radius: 12px; background: rgba(255,255,255,.07); }
+.my-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 6px; margin: 8px 14px 4px 0; }
+.my-stats div { padding: 4px 8px; border-radius: 10px; background: rgba(255,255,255,.07); }
 .my-stats dt { font-size: .78rem; color: var(--muted); font-weight: 700; }
-.my-stats dd { margin: 0; font-weight: 800; font-size: 1.05rem; }
-.result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.result-actions #res-again { grid-column: 1 / -1; justify-content: center; text-align: center; }
-.result-actions #res-share { grid-column: 1 / -1; }
+.my-stats dd { margin: 0; font-weight: 800; font-size: .98rem; overflow-wrap: anywhere; }
+/* 再來一局（主要）一整列；分享、回到設定／房間、回到首頁同一列 */
+.result-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 10px; }
+.result-actions #res-again { grid-column: 1 / -1; order: -1; justify-content: center; text-align: center; min-height: 58px; }
+.result-actions .btn { padding: 8px 10px; }
 
 /* ---------- 怎麼玩 ---------- */
 .howto { max-width: 820px; margin: 0 auto; display: grid; gap: 14px; }
@@ -453,7 +457,6 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .dd-lang .dd-btn { min-width: 48px; padding: 6px 8px; }
   .scr-head { padding-right: calc(124px + var(--safe-r)); }
   .hud-top { padding-right: 116px; }
-  .result-actions { grid-template-columns: 1fr; }
 }
 @media (max-height: 520px) and (orientation: landscape) {
   .home-inner { padding-top: calc(64px + var(--safe-t)); gap: 10px; justify-content: flex-start; }
@@ -464,7 +467,7 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .result { padding-top: calc(10px + var(--safe-t)); }
   .result-card { padding: 12px; }
   .result-actions { grid-template-columns: repeat(4, 1fr); }
-  .result-actions #res-again, .result-actions #res-share { grid-column: auto; }
+  .result-actions #res-again { grid-column: auto; }
   .result-actions .big-btn { min-height: 48px; font-size: 1rem; padding: 6px 10px; }
 }
 @media (prefers-reduced-motion: reduce) {

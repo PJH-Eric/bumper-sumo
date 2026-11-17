@@ -1,0 +1,4 @@
+[錯誤] 找不到 Node.js 26。
+這個遊戲需要 Node.js 26.12.1 或更新的 26.x 版本。
+請到 https://nodejs.org/ 安裝 Node.js 26，
+或在命令列執行：nvm install 26 （nvm-windows）

@@ -1,36 +1,41 @@
 @echo off
+rem Bumper Brawl launcher. Keep this file ASCII-only: cmd.exe misreads UTF-8 lines after chcp 65001.
+rem All Chinese messages are printed by scripts\start.js or scripts\msg-*.txt.
 chcp 65001 >nul
+setlocal
 cd /d "%~dp0"
 
-where node >nul 2>nul
-if errorlevel 1 (
-  echo [錯誤] 找不到 Node.js，請先到 https://nodejs.org/ 安裝 Node.js 22 以上版本。
+set "NODE_EXE="
+set "NODEVER="
+for /f "delims=" %%V in ('node -v 2^>nul') do set "NODEVER=%%V"
+if defined NODEVER if "%NODEVER:~0,4%"=="v26." set "NODE_EXE=node"
+
+rem PATH node is not 26.x: look for Node 26 installed by nvm-windows
+if not defined NODE_EXE if defined NVM_HOME for /d %%D in ("%NVM_HOME%\v26.*") do if exist "%%D\node.exe" set "NODE_DIR=%%D"
+if not defined NODE_EXE if not defined NODE_DIR for /d %%D in ("%APPDATA%\nvm\v26.*") do if exist "%%D\node.exe" set "NODE_DIR=%%D"
+if not defined NODE_EXE if defined NODE_DIR (
+  set "PATH=%NODE_DIR%;%PATH%"
+  set "NODE_EXE=%NODE_DIR%\node.exe"
+)
+
+if not defined NODE_EXE (
+  type "scripts\msg-need-node.txt"
+  if defined NODEVER echo   Current: %NODEVER%
+  echo.
   pause
   exit /b 1
 )
 
 if not exist "node_modules" (
-  echo 第一次啟動，正在安裝相依套件（只要做一次）…
+  type "scripts\msg-install.txt"
   call npm install --no-audit --no-fund
   if errorlevel 1 (
-    echo [錯誤] 套件安裝失敗，請確認網路連線後再試一次。
+    type "scripts\msg-install-fail.txt"
     pause
     exit /b 1
   )
 )
 
-echo ================================================
-echo   碰碰車大亂鬥 - 遊戲伺服器
-echo ================================================
+"%NODE_EXE%" scripts\start.js
 echo.
-echo   這台電腦開遊戲：  http://localhost:3250
-echo   其他電腦／手機請用下面印出的「同網段」網址。
-echo   要停止請按 Ctrl+C 或關掉這個視窗。
-echo.
-
-start "" /b cmd /c "ping -n 3 127.0.0.1 >nul & start "" http://localhost:3250"
-
-node server.js
-echo.
-echo 伺服器已停止。
 pause

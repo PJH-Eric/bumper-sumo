@@ -12,7 +12,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
-        value: "22.23.2"
+        value: "26.12.1"
       # 前端放 GitHub Pages 時填 https://<帳號>.github.io（逗號分隔多個來源）
       - key: GAME_ALLOWED_ORIGIN
         sync: false

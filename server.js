@@ -98,8 +98,17 @@ setInterval(() => {
   for (const [sid, s] of hub.sessions) if (!s.socketId && !s.room) hub.sessions.delete(sid);
 }, 60000).unref();
 
+server.on('error', (e) => {
+  if (e && e.code === 'EADDRINUSE') {
+    console.error(PORT + ' 埠已經被佔用（可能遊戲已經開著了）。直接開 http://localhost:' + PORT + '，或用 PORT=其他埠號 重新啟動。');
+    process.exit(1);
+  }
+  throw e;
+});
+
 server.listen(PORT, HOST, () => {
   console.log('碰碰車大亂鬥 伺服器啟動：http://localhost:' + PORT);
+  if (process.env.QUIET_BANNER) return;
   const nets = os.networkInterfaces();
   for (const list of Object.values(nets)) for (const n of list || []) {
     if (n.family === 'IPv4' && !n.internal) console.log('  同網段：http://' + n.address + ':' + PORT);
