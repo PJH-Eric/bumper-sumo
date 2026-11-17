@@ -127,7 +127,7 @@
     if (S.online.pendingInvite) showInvitePanel();
     $('game-cv').setAttribute('aria-label', t('game.canvas'));
   }
-  function setLabels(r) { r.labels = { bonk: t('fx.bonk'), clash: t('fx.clash'), whoosh: t('fx.whoosh'), saved: t('fx.saved') }; }
+  function setLabels(r) { r.labels = { bonk: t('fx.bonk'), clash: t('fx.clash'), whoosh: t('fx.whoosh'), saved: t('fx.saved'), you: t('common.you') }; }
 
   /* ====================================================== 首頁 */
   function renderStats() {
@@ -354,6 +354,13 @@
     if (doc.body.classList.contains('touch-on') && !S.touchHintShown && !(S.mode === 'online' && S.online.role !== 'player')) {
       S.touchHintShown = true; hint.hidden = false;
       setTimeout(function () { hint.hidden = true; }, 5000);
+    }
+    /* 鍵盤玩家：開局顯示按鍵提示（方向鍵／WASD、空白鍵、E），開始後 6 秒收起；每次打開遊戲前 3 局都提示 */
+    var kh = $('key-hint');
+    kh.hidden = true; clearTimeout(S.keyHintTimer);
+    if (!doc.body.classList.contains('touch-on') && (S.keyHintCount || 0) < 3 && !(S.mode === 'online' && S.online.role !== 'player')) {
+      S.keyHintCount = (S.keyHintCount || 0) + 1; kh.hidden = false;
+      S.keyHintTimer = setTimeout(function () { kh.hidden = true; }, 9000);
     }
   }
 

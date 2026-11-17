@@ -143,15 +143,76 @@
     this.drawParticles(ctx, W, H, u, dt);
   };
 
+  Renderer.prototype.drawHeading = function (ctx, c, x, y, u, t) {
+    var ready = c.dash.phase === 'idle' && c.dash.cd <= 0 && c.fx.spin <= 0;
+    var charge = c.dash.phase === 'charge';
+    var au = Math.max(u, 38);                 // 手機上擂台小，箭頭至少要看得清楚
+    var pulse = this.opts.reduce ? 0 : Math.sin(t * 6) * 0.06;
+    var start = u * 0.72 + (charge ? au * 0.12 : 0);
+    var len = au * (charge ? 0.78 : ready ? 0.62 + pulse : 0.4);
+    var half = au * (charge ? 0.4 : ready ? 0.34 : 0.22);
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(c.angle);
+    if (ready || charge) {   // 衝刺路徑預覽（虛線）
+      var endX = Math.max(start + len + u * 0.5, u * 3.3);   // 衝刺約衝 3.3 個車身（最高速 5 × 2.2 × 0.3 秒）
+      ctx.lineCap = 'round';
+      ctx.setLineDash([au * 0.16, au * 0.14]); ctx.lineDashOffset = this.opts.reduce ? 0 : -t * au * 0.9;
+      ctx.strokeStyle = 'rgba(40,20,80,0.55)'; ctx.lineWidth = Math.max(4, au * 0.13);   // 深色底線：在亮色擂台上也看得清楚
+      ctx.beginPath(); ctx.moveTo(start + len, 0); ctx.lineTo(endX, 0); ctx.stroke();
+      ctx.strokeStyle = charge ? '#ffb36b' : '#ffffff'; ctx.lineWidth = Math.max(2, au * 0.065);
+      ctx.beginPath(); ctx.moveTo(start + len, 0); ctx.lineTo(endX, 0); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.fillStyle = charge ? '#ff5a1f' : ready ? '#fff04d' : 'rgba(235,235,245,0.75)';
+    ctx.strokeStyle = charge ? '#ffffff' : ready ? '#3a2266' : 'rgba(40,30,80,0.6)';
+    ctx.lineWidth = Math.max(2, au * 0.055); ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(start, -half); ctx.lineTo(start + len, 0); ctx.lineTo(start, half); ctx.lineTo(start + len * 0.22, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  };
+
+  Renderer.prototype.drawMePin = function (ctx, x, y, u, t) {
+    var au = Math.max(u, 38);
+    var bob = this.opts.reduce ? 0 : Math.abs(Math.sin(t * 4)) * au * 0.12;
+    var fs = Math.max(13, Math.round(au * 0.34));
+    var label = this.labels.you || 'YOU';
+    ctx.save();
+    ctx.font = '900 ' + fs + 'px "Baloo 2", "Noto Sans TC", system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    var tw = ctx.measureText(label).width + fs * 0.9, th = fs * 1.35;
+    var tipY = y - Math.max(u * 0.72, 22) - bob;          // 三角尖端（在車頭上方）
+    var boxY = tipY - fs * 0.45 - th;
+    ctx.fillStyle = '#ffe14d'; ctx.strokeStyle = '#2a1650'; ctx.lineWidth = Math.max(2.5, fs * 0.16); ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - fs * 0.38, boxY + th - 1); ctx.lineTo(x, tipY); ctx.lineTo(x + fs * 0.38, boxY + th - 1); ctx.closePath();
+    ctx.stroke(); ctx.fill();
+    Art.rr(ctx, x - tw / 2, boxY, tw, th, th / 2); ctx.stroke(); ctx.fill();
+    ctx.fillStyle = '#2a1650'; ctx.fillText(label, x, boxY + th / 2 + 1);
+    ctx.restore();
+  };
+
   Renderer.prototype.drawLiveCar = function (ctx, c, x, y, u, t, view, s) {
     var mine = c.id === view.myId;
     var ang = c.angle;
-    /* 我的車：腳下光圈 */
+    /* 我的車：腳下雙色光圈（深色底＋白色虛線，在任何主題地板上都看得到）＋開局擴散波紋 */
     if (mine) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = Math.max(2, u * 0.07);
-      ctx.setLineDash([u * 0.18, u * 0.12]); ctx.lineDashOffset = -t * u * 0.8;
-      Art.circle(ctx, x, y + u * 0.08, u * 0.66); ctx.stroke();
+      var mr = Math.max(u * 0.66, 18);
+      ctx.strokeStyle = 'rgba(30,16,70,0.55)'; ctx.lineWidth = Math.max(4, u * 0.14);
+      Art.circle(ctx, x, y + u * 0.08, mr); ctx.stroke();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(2.5, u * 0.08);
+      ctx.setLineDash([u * 0.2, u * 0.12]); ctx.lineDashOffset = this.opts.reduce ? 0 : -t * u * 0.8;
+      Art.circle(ctx, x, y + u * 0.08, mr); ctx.stroke();
+      ctx.setLineDash([]);
+      /* 開局（倒數到開始後 2.5 秒）：從自己的車往外擴散的黃色波紋，一眼找到自己 */
+      if (s.phase === 'countdown' || (s.phase === 'playing' && s.t < 2.5)) {
+        for (var pr = 0; pr < 2; pr++) {
+          var pk = this.opts.reduce ? 0.35 : ((t * 0.9 + pr * 0.5) % 1);
+          ctx.strokeStyle = 'rgba(255,225,60,' + (1 - pk) * 0.9 + ')'; ctx.lineWidth = Math.max(3, u * 0.1);
+          Art.circle(ctx, x, y, mr + pk * Math.max(u * 2.4, 70)); ctx.stroke();
+        }
+      }
       ctx.restore();
     }
     /* 隊伍色外框 */
@@ -200,6 +261,8 @@
       Art.circle(ctx, x, y, u * 0.85); ctx.fill();
       ctx.restore();
     }
+    /* 自己的車：車頭方向箭頭（衝刺會往這個方向衝）。準備好＝亮黃＋衝刺路徑虛線；冷卻中＝小灰；蓄力中＝拉長橘色 */
+    if (mine && c.wobble <= 0 && c.dash.phase !== 'burst' && !c.fx.spring) this.drawHeading(ctx, c, x, y, u, t);
     Art.drawCar(ctx, x + ox, y + oy, ang, u, c.skin, {
       t: t, mood: c.mood, flash: c.fx.flash > 0.05, wobble: c.wobble > 0, shield: c.fx.shield > 0, iron: c.fx.iron > 0,
       lift: lift, scale: sc, colorBlind: this.opts.colorBlind
@@ -235,6 +298,8 @@
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', x, y - u * 1.04);
       ctx.restore();
     }
+    /* 自己的車頭上：會上下跳的「你」指標（關掉名牌也一直顯示，避免找不到自己） */
+    if (mine) this.drawMePin(ctx, x, y - lift - (c.wobble > 0 ? u * 0.6 : 0) - (c.fx.spin > 0 ? u * 0.35 : 0), u, t);
     /* 名牌 */
     if (this.opts.names && !c.dummy) {
       var name = view.nameOf ? view.nameOf(c) : c.name;
@@ -292,6 +357,7 @@
     Art.circle(ctx, x + gw * 0.22, y - gh * 0.3, u * 0.06); ctx.fill();
     ctx.beginPath(); ctx.arc(x, y - gh * 0.15, u * 0.08, 0, Math.PI); ctx.fill();
     ctx.restore();
+    if (mine) this.drawMePin(ctx, x, y - gh * 0.55, u, t);   // 出局變幽靈後也找得到自己
     /* 丟道具冷卻圈（自己的幽靈才顯示；只剩 2 台時變灰） */
     if (mine && s.opts.items) {
       var active = s.phase === 'playing' && view.ghostActive;

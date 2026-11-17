@@ -591,3 +591,11 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 .touch-hint span { max-width: 46%; padding: 8px 14px; border-radius: 14px; background: rgba(20,14,50,.82); font-weight: 800; box-shadow: 0 4px 0 rgba(0,0,0,.3); word-break: keep-all; text-wrap: balance; line-height: 1.35; }   /* 中文只在標點處換行（不會出現「開／車」斷字） */
 @keyframes hintIn { from { opacity: 0; transform: translateY(10px); } }
 body:not(.touch-on) .touch-hint { display: none; }
+/* 鍵盤提示（桌機）：擂台下方中間，自繪鍵帽 */
+.key-hint { position: absolute; z-index: 9; left: 50%; bottom: calc(18px + var(--safe-b)); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; max-width: calc(100% - 300px); padding: 10px 16px; border-radius: 16px; background: rgba(20,14,50,.86); box-shadow: 0 4px 0 rgba(0,0,0,.3); pointer-events: none; animation: hintIn .4s ease-out; }
+.kh-grp { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-weight: 800; }
+.kh-grp b { margin-left: 4px; }
+.kh-grp i { font-style: normal; color: var(--muted); margin: 0 2px; }
+.kc { min-width: 28px; height: 28px; padding: 0 6px; border-radius: 7px; display: inline-grid; place-items: center; background: #fff; color: var(--ink); font-weight: 900; font-size: .85rem; box-shadow: 0 3px 0 #9d94c9; }
+.kc-wide { min-width: 52px; }
+body.touch-on .key-hint { display: none; }

@@ -190,6 +190,23 @@ async function main() {
   const bx1 = await B.evaluate(() => { const c = window.BumperRules.getCar(window.BumperApp.S.match, window.BumperApp.S.myId); return c.x; });
   ok(bx1 > bx0 + 0.3, '觸控搖桿操作（伺服器確認後）車子移動：' + bx0.toFixed(2) + '→' + bx1.toFixed(2));
   await A.close(); await Bctx.close(); await Cctx.close();
+  /* ---- 鍵盤操作：方向鍵與 WASD 都能開車、桌機開局有按鍵提示 ---- */
+  {
+    const K = await (await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'zh-TW' })).newPage();
+    await K.goto(BASE); await K.waitForTimeout(300);
+    await K.click('#btn-practice'); await K.waitForTimeout(600);
+    ok(await K.isVisible('#key-hint'), '桌機開局顯示鍵盤提示（方向鍵／WASD、空白、E）');
+    const moved = {};
+    for (const [key, ax, sign] of [['ArrowRight', 'x', 1], ['ArrowLeft', 'x', -1], ['ArrowUp', 'y', -1], ['ArrowDown', 'y', 1], ['KeyW', 'y', -1], ['KeyD', 'x', 1]]) {
+      await K.evaluate(() => { const S = window.BumperApp.S, c = window.BumperRules.getCar(S.match, S.myId); c.x = 0; c.y = 0; c.vx = 0; c.vy = 0; });
+      await K.keyboard.down(key); await K.waitForTimeout(250); await K.keyboard.up(key);
+      const v = await K.evaluate((a) => { const S = window.BumperApp.S, c = window.BumperRules.getCar(S.match, S.myId); return c[a]; }, ax);
+      moved[key] = v * sign > 0.3;
+    }
+    ok(moved.ArrowRight && moved.ArrowLeft && moved.ArrowUp && moved.ArrowDown, '上下左右方向鍵都能開車（方向正確）：' + JSON.stringify(moved));
+    ok(moved.KeyW && moved.KeyD, 'WASD 也能開車');
+    await K.context().close();
+  }
   await browser.close();
   console.log((fail ? '✗' : '✓') + ' 瀏覽器檢查 ' + pass + ' 項通過' + (fail ? '，' + fail + ' 項失敗' : ''));
   process.exitCode = fail ? 1 : 0;
