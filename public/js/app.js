@@ -499,6 +499,7 @@
     var me = S.match && R.getCar(S.match, S.myId);
     if (!S.match || !me || me.alive || S.match.phase === 'over' || S.mode === 'practice') { tip.hidden = true; return; }
     tip.hidden = false;
+    $('rotate-tip').hidden = true;   // 兩個提示同一位置，幽靈提示優先
     tip.textContent = !S.match.opts.items ? t('ghost.noItems') : (R.ghostActive(S.match) ? t('ghost.tip') : t('ghost.stopped'));
   }
 
@@ -549,7 +550,7 @@
     var tip = $('rotate-tip');
     var portrait = w.innerHeight > w.innerWidth && w.innerWidth < 600;
     tip.hidden = !(portrait && !S.rotateShown && S.mode !== 'practice');
-    if (!tip.hidden) S.rotateShown = true;
+    if (!tip.hidden) { S.rotateShown = true; setTimeout(function () { tip.hidden = true; }, 5000); }
   }
 
   /* ====================================================== 暫停 */
