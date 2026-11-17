@@ -155,7 +155,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .sa-view { flex: 1 1 auto; min-height: 0; max-height: inherit; overflow: auto; scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .sa-view::-webkit-scrollbar { display: none; }
 .sa-track { position: absolute; top: 6px; bottom: 6px; right: 3px; width: 8px; border-radius: 4px; background: rgba(255,255,255,.08); opacity: 0; transition: opacity .2s; z-index: 5; }
-.sa-over > .sa-track:not(.sa-h) { opacity: 1; }
+.sa-over > .sa-track:not(.sa-h) { opacity: 1; transition: none; }  /* 內容一超出就立刻顯示捲軸，收起時才淡出 */
 .sa-thumb { width: 100%; border-radius: 4px; background: linear-gradient(var(--pink), var(--violet)); cursor: grab; touch-action: none; }
 .sa-track.sa-h { top: auto; bottom: 3px; left: 6px; right: 6px; width: auto; height: 8px; }
 .sa-h .sa-thumb { height: 100%; }

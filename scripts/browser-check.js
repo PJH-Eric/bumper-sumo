@@ -1,6 +1,7 @@
 /* scripts/browser-check.js — 無頭瀏覽器操作檢查（需要 npm start 與本機 Chrome／Edge）
  * 單機路徑不連後端、語言切換（相鄰設定鈕、保存、不重置對局）、設定彈窗（Escape／焦點／恢復預設）、
  * 倒數期間不能動、最後 10 秒提示、完整一局＋結算三動作＋分享圖片、再來一局重新倒數、紀錄去重與清除確認、
+ * （所有瀏覽器環境固定 zh-TW 語系，避免系統語言不同造成自動切到英文而誤判）
  * 自訂捲軸、各尺寸無水平溢出、邀請連結先停在大廳確認暱稱、線上兩人＋電腦開局、觀戰不能操作。 */
 'use strict';
 const fs = require('fs');
@@ -13,7 +14,7 @@ function ok(c, name) { if (c) pass++; else { fail++; console.log('✗ ' + name);
 
 async function main() {
   const browser = await chromium.launch({ executablePath: EXE, headless: true });
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'zh-TW' });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -137,7 +138,7 @@ async function main() {
   ok(errors.length === 0, '頁面沒有 JS 錯誤：' + errors.join(' | '));
 
   /* ---- 線上：邀請連結先停在大廳、兩人＋電腦開局、觀戰 ---- */
-  const A = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const A = await browser.newPage({ viewport: { width: 1280, height: 800 }, locale: 'zh-TW' });
   await A.goto(BASE); await A.click('#btn-online');
   await A.waitForFunction(() => window.BumperNet.connected(), null, { timeout: 8000 });
   await A.waitForSelector('#lobby-online:not([hidden])', { timeout: 3000 }).catch(() => {});
@@ -146,7 +147,7 @@ async function main() {
   await A.waitForSelector('#s-room:not([hidden])', { timeout: 5000 });
   const invite = (await A.textContent('#room-invite-url')).trim();
   ok(/room=[A-Z0-9]{4}&invite=[a-f0-9]{32}/.test(invite), '房間直接顯示邀請連結');
-  const Bctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const Bctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, locale: 'zh-TW' });
   const B = await Bctx.newPage();
   await B.goto(invite);
   await B.waitForSelector('#invite-panel:not([hidden])', { timeout: 8000 });
@@ -157,7 +158,7 @@ async function main() {
   await A.click('#room-seats .empty-seat .btn');   // 加電腦
   await B.click('#room-ready');
   await A.waitForFunction(() => !document.getElementById('room-start').disabled, null, { timeout: 3000 });
-  const Cctx = await browser.newContext({ viewport: { width: 1180, height: 820 } });
+  const Cctx = await browser.newContext({ viewport: { width: 1180, height: 820 }, locale: 'zh-TW' });
   const C = await Cctx.newPage();
   await C.goto(invite); await C.waitForSelector('#invite-panel:not([hidden])');
   await C.fill('#invite-name', '路人'); await C.click('#invite-watch');

@@ -8,7 +8,8 @@ const lang = process.argv[2] || 'zh-Hant';
 const devs = (process.argv[3] || 'phone,phoneL,tabletP,tabletL,desktop').split(',');
 const ORDER = ['home', 'solo', 'countdown', 'game', 'result', 'share', 'settings', 'records', 'howto', 'practice', 'lobby', 'room'];
 (async () => {
-  const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
+  const EXE = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', '/usr/bin/google-chrome', '/usr/bin/chromium'].filter(Boolean).find((p) => fs.existsSync(p));
+  const b = await chromium.launch({ executablePath: EXE });
   for (const d of devs) {
     const files = ORDER.map((n) => `${lang}-${d}-${n}.png`).filter((f) => fs.existsSync(path.join(DIR, f)));
     const land = /L$|desktop/.test(d);
