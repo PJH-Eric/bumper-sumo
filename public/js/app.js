@@ -29,6 +29,8 @@
     if (id === 'home') { startHero(); renderStats(); } else stopHero();
     if (id !== 'game') { Audio.music(true, 'menu'); }
     if (LobbyChatUI) LobbyChatUI.refresh();
+    if (id === 'room') dockChat('room'); else if (id === 'game') dockChat('game');
+    if (id !== 'room') doc.body.classList.remove('room-chat-full');
     UI.refreshScroll();
     var f = doc.querySelector('#s-' + id + ' .back-btn, #s-' + id + ' .big-btn');
     if (f && id !== 'game') setTimeout(function () { if (!UI.Modal.any()) f.focus({ preventScroll: true }); }, 50);
@@ -1092,6 +1094,7 @@
     roomPrivate = UI.Switch('#room-private', function (v) { Net.send('room:config', { private: v }); });
     dds.roomMode = roomDD.mode; dds.roomTheme = roomDD.theme;
     /* 房間聊天 */
+    bindRoomChat();
     $('game-chat-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var inp = $('game-chat-input'); var v = inp.value.trim(); if (!v) return;
@@ -1103,6 +1106,30 @@
       b.addEventListener('click', function () { sendChat({ quick: q }); });
       $('game-chat-quick').appendChild(b);
     });
+  }
+  /* ---------- 房間聊天：同一個聊天區在房間（左下／左欄）與對局（左側資訊欄）之間移動 ---------- */
+  var ROOM_CHAT_WIDE = '(min-width: 1080px) and (orientation: landscape) and (min-height: 600px)';
+  function dockChat(where) {
+    var chat = $('game-chat'); if (!chat) return;
+    if (where === 'room') {
+      if (chat.parentNode !== $('room-chat-slot')) $('room-chat-slot').appendChild(chat);
+      chat.hidden = false;
+    } else if (chat.parentNode !== $('side-body')) $('side-body').appendChild(chat);
+    if (chatSA) setTimeout(function () { chatSA.toBottom(); }, 0);
+  }
+  function roomChatVisible() { return w.matchMedia(ROOM_CHAT_WIDE).matches || $('room-chat').classList.contains('open'); }
+  function roomChatSet(open, focus) {
+    $('room-chat').classList.toggle('open', open);
+    doc.body.classList.toggle('room-chat-full', open && w.matchMedia('(max-width: 640px), (max-height: 520px)').matches);   // 手機全螢幕聊天時收起延遲徽章
+    $('room-chat-fab').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) { S.online.roomUnread = 0; $('room-chat-unread').hidden = true; if (chatSA) setTimeout(function () { chatSA.toBottom(); }, 0); if (focus) setTimeout(function () { $('game-chat-input').focus({ preventScroll: true }); }, 30); }
+    else if (focus) $('room-chat-fab').focus({ preventScroll: true });
+    UI.refreshScroll();
+  }
+  function bindRoomChat() {
+    $('room-chat-fab').addEventListener('click', function () { roomChatSet(!$('room-chat').classList.contains('open'), true); });
+    $('room-chat-close').addEventListener('click', function () { roomChatSet(false, true); });
+    $('room-chat').addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('room-chat').classList.contains('open') && !w.matchMedia(ROOM_CHAT_WIDE).matches) { e.stopPropagation(); roomChatSet(false, true); } });
   }
   function sendChat(p) {
     var pend = { id: 'p' + Date.now(), name: (mySeat() || {}).name || Store.name(), text: p.text, quick: p.quick, sid: S.online.sid, pending: true };
@@ -1118,7 +1145,13 @@
     renderChatLog();
     if (!p.msg.sys && p.msg.sid !== S.online.sid) {
       Audio.sfx('chat');
-      if ($('side').classList.contains('collapsed')) { S.online.unread++; $('side-unread').hidden = false; $('side-unread').textContent = String(Math.min(99, S.online.unread)); }
+      if (S.screen === 'room') {
+        if (!roomChatVisible()) {
+          S.online.roomUnread = (S.online.roomUnread || 0) + 1;
+          $('room-chat-unread').hidden = false; $('room-chat-unread').textContent = String(Math.min(99, S.online.roomUnread));
+          var fab = $('room-chat-fab'); fab.classList.remove('bump'); void fab.offsetWidth; fab.classList.add('bump');
+        }
+      } else if ($('side').classList.contains('collapsed')) { S.online.unread++; $('side-unread').hidden = false; $('side-unread').textContent = String(Math.min(99, S.online.unread)); }
     }
   }
   function chatText(m) { return m.sys ? t(m.sys, m.params) : (m.quick ? t('quick.' + m.quick) : m.text); }

@@ -162,6 +162,16 @@
         </section>
       </div>
     </div>
+    <!-- 房間聊天：寬螢幕固定在左欄；窄螢幕是左下浮動氣泡，點開才展開（手機全螢幕）。聊天內容跟對局中共用同一個 #game-chat -->
+    <aside class="room-chat" id="room-chat">
+      <button type="button" class="room-chat-fab" id="room-chat-fab" aria-expanded="false" aria-controls="room-chat-panel" data-i18n-aria="chat.title">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span class="unread" id="room-chat-unread" hidden></span>
+      </button>
+      <div class="room-chat-panel" id="room-chat-panel" role="region" data-i18n-aria="chat.title">
+        <button type="button" class="icon-btn room-chat-close" id="room-chat-close" data-i18n-aria="common.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div class="room-chat-slot" id="room-chat-slot"></div>
+      </div>
+    </aside>
     <footer class="scr-foot room-foot">
       <button type="button" class="btn ghost" id="room-spectate" data-i18n="room.toSpectate">改去觀戰</button>
       <button type="button" class="big-btn b-pink go-btn" id="room-ready"><b data-i18n="room.ready">準備好了</b></button>

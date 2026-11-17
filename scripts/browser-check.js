@@ -155,6 +155,16 @@ async function main() {
   await B.fill('#invite-name', '朋友'); await B.click('#invite-join');
   await B.waitForSelector('#s-room:not([hidden])', { timeout: 5000 });
   ok(!(await B.evaluate(() => location.search.includes('invite'))), '加入後網址清掉邀請參數');
+  /* ---- 房間聊天：寬螢幕固定左欄、手機左下氣泡＋未讀、點開看得到訊息、Esc 收起 ---- */
+  ok(await A.isVisible('#room-chat-panel') && !(await A.isVisible('#room-chat-fab')), '寬螢幕房間聊天固定在左欄');
+  ok(await B.isVisible('#room-chat-fab') && !(await B.isVisible('#room-chat-panel')), '手機房間聊天是左下氣泡（預設收起）');
+  await A.fill('#game-chat-input', '等等開'); await A.press('#game-chat-input', 'Enter');
+  await B.waitForSelector('#room-chat-unread:not([hidden])', { timeout: 3000 }).catch(() => {});
+  ok(await B.isVisible('#room-chat-unread'), '手機收起時收到房間訊息會顯示未讀');
+  await B.tap('#room-chat-fab'); await B.waitForTimeout(200);
+  ok(await B.isVisible('#room-chat-panel') && (await B.textContent('#game-chat-log')).includes('等等開') && !(await B.isVisible('#room-chat-unread')), '點開房間聊天看得到訊息、未讀清除');
+  await B.keyboard.press('Escape'); await B.waitForTimeout(150);
+  ok(!(await B.isVisible('#room-chat-panel')), 'Esc 收起手機房間聊天');
   await A.click('#room-seats .empty-seat .btn');   // 加電腦
   await B.click('#room-ready');
   await A.waitForFunction(() => !document.getElementById('room-start').disabled, null, { timeout: 3000 });
@@ -167,6 +177,7 @@ async function main() {
   await A.click('#room-start');
   await Promise.all([A, B, C].map((p) => p.waitForSelector('#s-game:not([hidden])', { timeout: 6000 })));
   ok(true, '三人（含觀戰）都進入對局畫面');
+  ok(await A.evaluate(() => document.getElementById('game-chat').parentNode.id === 'side-body'), '開局後聊天回到對局左側資訊欄');
   await B.waitForFunction(() => window.BumperApp.S.match && window.BumperApp.S.match.phase === 'playing', null, { timeout: 6000 });
   ok(await C.isVisible('#hud-role'), '觀戰者畫面標示觀戰中');
   ok(await C.evaluate(() => !window.BumperRules.getCar(window.BumperApp.S.match, window.BumperApp.S.myId)), '觀戰者沒有車');
