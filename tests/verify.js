@@ -308,6 +308,10 @@ function hitTest(dash) {
   R.setInput(s, 'p0', { mx: 0, my: 1 });
   const th = g.ghost.theta; stepN(s, 30, () => R.setInput(s, 'p0', { mx: 0, my: 1 }));
   ok(g.ghost.theta !== th, '幽靈沿外圈移動');
+  stepN(s, 240, () => R.setInput(s, 'p0', { mx: 0, my: 1 }));
+  ok(Math.abs(g.ghost.theta - Math.PI / 2) < 0.02, '搖桿指向哪個方位，幽靈就滑到那裡停住：' + g.ghost.theta.toFixed(3));
+  stepN(s, 200, () => R.setInput(s, 'p0', { mx: -1, my: 0 }));
+  ok(Math.abs(Math.abs(g.ghost.theta) - Math.PI) < 0.05, '改指左邊會繞到左邊');
   ok(Math.hypot(g.x, g.y) > s.arena.r0, '幽靈不能進入擂台');
 
   /* 只剩 2 台時幽靈停手 */

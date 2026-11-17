@@ -345,6 +345,13 @@
     Audio.music(true, 'play'); Audio.tempo(1);
     updateSummary(true); updateGhostTip(); updateItemBtn(true);
     maybeRotateTip();
+    /* 觸控玩家第一局：提示左半邊拖曳開車、右下衝刺（碰一下或 5 秒後消失） */
+    var hint = $('touch-hint');
+    hint.hidden = true;
+    if (doc.body.classList.contains('touch-on') && !S.touchHintShown && !(S.mode === 'online' && S.online.role !== 'player')) {
+      S.touchHintShown = true; hint.hidden = false;
+      setTimeout(function () { hint.hidden = true; }, 5000);
+    }
   }
 
   /* ====================================================== 倒數遮罩 */
@@ -402,6 +409,11 @@
     }
   }
 
+  /** 震動回饋（跟「畫面震動」設定一起開關；不支援的裝置直接略過） */
+  function buzz(pattern) {
+    if (S.settings.shake && !S.settings.reduceMotion && w.navigator.vibrate) { try { w.navigator.vibrate(pattern); } catch (e) { /* 部分瀏覽器擋 */ } }
+  }
+
   /* 事件 → 音效、特效、倒數 */
   function handleEvents(evts) {
     if (!evts || !evts.length) return;
@@ -415,8 +427,8 @@
         case 'clash': Audio.sfx('clash'); break;
         case 'charge': if (e.id === S.myId) Audio.sfx('charge'); break;
         case 'burst': Audio.sfx(e.sup ? 'super' : 'dash'); break;
-        case 'fall': Audio.sfx('fall'); if (e.id === S.myId) { updateGhostTip(); Audio.sfx('ghost'); } break;
-        case 'wobble': Audio.sfx('wobble'); break;
+        case 'fall': Audio.sfx('fall'); if (e.id === S.myId) { updateGhostTip(); Audio.sfx('ghost'); buzz([60, 40, 90]); } break;
+        case 'wobble': Audio.sfx('wobble'); if (e.id === S.myId) buzz([30, 30, 30]); break;
         case 'pickup': if (e.id === S.myId) Audio.sfx('pickup'); break;
         case 'use': Audio.sfx({ shield: 'shield', spring: 'spring', magnet: 'magnet', iron: 'iron', banana: 'banana' }[e.item] || 'use'); break;
         case 'shieldBlock': Audio.sfx('block'); break;

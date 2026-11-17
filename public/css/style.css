@@ -532,3 +532,15 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 /* 簡中字形後備 */
 :lang(zh-Hans) { --font: "Baloo 2", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
 :lang(zh-Hans) body, html:lang(zh-Hans) { font-family: var(--font); }
+
+/* ---------- 觸控優化 ---------- */
+#s-game, #s-game * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#s-game input, #s-game .chat-log { -webkit-user-select: text; user-select: text; }
+/* 搖桿感應區：整個左半邊（避開上方 HUD），手指放哪裡搖桿就出現在哪裡 */
+.joy-zone { top: calc(70px + var(--safe-t)); height: auto; bottom: 0; }
+/* 按鈕命中區比外觀大一圈，手指偏一點也按得到 */
+.tbtn::before { content: ""; position: absolute; inset: -12px; border-radius: 50%; }
+.touch-hint { position: absolute; z-index: 9; inset: auto 0 calc(170px * var(--tb-size) + var(--safe-b)) 0; display: flex; justify-content: space-between; padding: 0 calc(24px + var(--safe-r)) 0 calc(24px + var(--safe-l)); pointer-events: none; animation: hintIn .4s ease-out; }
+.touch-hint span { max-width: 44%; padding: 8px 14px; border-radius: 14px; background: rgba(20,14,50,.82); font-weight: 800; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+@keyframes hintIn { from { opacity: 0; transform: translateY(10px); } }
+body:not(.touch-on) .touch-hint { display: none; }

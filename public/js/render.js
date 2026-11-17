@@ -202,6 +202,20 @@
         Art.star(ctx, x + Math.cos(aa) * u * 0.35, y - u * 0.75 + Math.sin(aa) * u * 0.12, u * 0.1, '#ffe36b');
       }
     }
+    /* 自己的車搖搖欲墜：畫一個指向擂台中心的箭頭，告訴你往哪推 */
+    if (c.wobble > 0 && mine) {
+      var toC = Math.atan2(-c.y, -c.x);
+      var pulseA = 0.75 + 0.25 * Math.sin(t * 16);
+      ctx.save();
+      ctx.translate(x, y); ctx.rotate(toC);
+      var au = Math.max(u, 30);   // 手機上擂台小，箭頭至少要夠大
+      ctx.fillStyle = 'rgba(78,224,122,' + pulseA + ')'; ctx.strokeStyle = '#1a3d22'; ctx.lineWidth = Math.max(2, au * 0.05);
+      ctx.beginPath();
+      ctx.moveTo(u * 0.7, -au * 0.16); ctx.lineTo(u * 0.7 + au * 0.5, -au * 0.16); ctx.lineTo(u * 0.7 + au * 0.5, -au * 0.36);
+      ctx.lineTo(u * 0.7 + au, 0); ctx.lineTo(u * 0.7 + au * 0.5, au * 0.36); ctx.lineTo(u * 0.7 + au * 0.5, au * 0.16); ctx.lineTo(u * 0.7, au * 0.16);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
     /* 搖搖欲墜：驚嘆號與搶救倒數圈 */
     if (c.wobble > 0) {
       ctx.save();

@@ -47,7 +47,7 @@
     ITEM_TOTAL_MAX: 6,
     ITEM_PICK_R: 0.85,
     GHOST_CD: 10,
-    GHOST_SPEED: 4,
+    GHOST_SPEED: 6,
     IRON_TIME: 6,
     IRON_MASS: 3,
     IRON_SLOW: 0.7,
@@ -536,9 +536,16 @@
     if (!g) return;
     if (g.fallT < 1) g.fallT = Math.min(1, g.fallT + DT / 0.9);
     var rg = s.arena.r0 + 1.4;
-    var tx = -Math.sin(g.theta), ty = Math.cos(g.theta);
-    var along = c.input.mx * tx + c.input.my * ty;
-    g.theta += along * C.GHOST_SPEED / rg * DT;
+    /* 方向鍵／搖桿指向哪裡，幽靈就沿外圈滑到那個方位（比「沿切線推」直覺，觸控尤其明顯） */
+    var mag = len(c.input.mx, c.input.my);
+    if (mag > 0.15) {
+      var want = Math.atan2(c.input.my, c.input.mx);
+      var diff = want - g.theta;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      var step = Math.min(Math.abs(diff), Math.min(1, mag) * C.GHOST_SPEED / rg * DT);
+      g.theta += diff > 0 ? step : -step;
+    }
     c.x = Math.cos(g.theta) * rg; c.y = Math.sin(g.theta) * rg;
     if (g.cd > 0) g.cd = Math.max(0, g.cd - DT);
     if (c.input.item) {

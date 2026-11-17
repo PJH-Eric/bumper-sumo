@@ -289,8 +289,8 @@
       goal = b.ghostGoal = pick ? Math.atan2(pick.y, pick.x) : rnd(b) * Math.PI * 2;
     }
     var da = angDiff(goal, g.theta);
-    var k = Math.max(-1, Math.min(1, da * 3));
-    out.mx = tx * k; out.my = ty * k;
+    /* 幽靈：指向想去的方位，就會沿外圈滑過去 */
+    if (Math.abs(da) > 0.05) { out.mx = Math.cos(goal); out.my = Math.sin(goal); }
     if (g.cd <= 0 && Math.abs(da) < 0.25 && rnd(b) < (b.level === 'kid' ? 0.2 : 0.6)) { out.item = true; b.ghostGoal = null; }
     b.mx = out.mx; b.my = out.my;
     return out;

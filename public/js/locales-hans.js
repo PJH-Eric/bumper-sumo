@@ -112,7 +112,7 @@
     "game.useItem": "使用道具：{item}",
     "ghost.noItems": "你出局了，变成幽灵！这局没有道具，在旁边帮大家加油吧。",
     "ghost.stopped": "只剩 2 台了，幽灵停手，看他们决胜负！",
-    "ghost.tip": "你出局了，变成幽灵！左右移动绕圈，按道具键往场上丢道具。",
+    "ghost.tip": "你出局了，变成幽灵！摇杆／方向键指向想去的方位就会绕过去，按道具键往场上丢道具。",
     "home.howto": "怎么玩",
     "home.howtoSub": "冲刺、抢救、道具一次看懂",
     "home.lobby": "回游戏大厅",
@@ -391,6 +391,8 @@
     "theme.random": "随机组合",
     "theme.sea": "海底",
     "theme.space": "太空",
-    "theme.volcano": "火山"
+    "theme.volcano": "火山",
+    "touch.left": "左半边拖曳：开车",
+    "touch.right": "右下：冲刺／道具"
   });
 }(typeof window !== 'undefined' ? window : globalThis));

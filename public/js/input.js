@@ -72,7 +72,15 @@
     var R = joyRadius();
     var dx = e.clientX - joy.ox, dy = e.clientY - joy.oy;
     var m = Math.hypot(dx, dy);
-    if (m > R) { dx = dx / m * R; dy = dy / m * R; }
+    if (m > R) {
+      /* 拖出底座外：底座跟著手指走，永遠不會「推到底推不動」 */
+      var over = m - R;
+      joy.ox += dx / m * over; joy.oy += dy / m * over;
+      var zr = els.zone.getBoundingClientRect();
+      els.joy.style.left = (joy.ox - zr.left) + 'px';
+      els.joy.style.top = (joy.oy - zr.top) + 'px';
+      dx = dx / m * R; dy = dy / m * R;
+    }
     var dead = R * 0.12;
     joy.x = m < dead ? 0 : dx / R; joy.y = m < dead ? 0 : dy / R;
     setKnob(dx, dy);
@@ -86,10 +94,13 @@
     els.joy.style.left = ''; els.joy.style.top = ''; els.joy.style.bottom = '';
   }
 
+  function hideHint() { var h = doc.getElementById('touch-hint'); if (h) h.hidden = true; }
+
   function bindButton(btn, which) {
     if (!btn) return;
     btn.addEventListener('pointerdown', function (e) {
       if (!enabled) return;
+      hideHint();
       edge[which] = true;
       btn.classList.add('pressed');
       e.preventDefault();
@@ -117,8 +128,11 @@
       });
       doc.addEventListener('keyup', function (e) { onKey(e, false); });
       root.addEventListener('blur', Input.reset);
+      /* 對局畫面不要長按選單、文字選取等瀏覽器手勢 */
+      var stage = doc.getElementById('stage');
+      if (stage) stage.addEventListener('contextmenu', function (e) { if (enabled) e.preventDefault(); });
       if (els.zone) {
-        els.zone.addEventListener('pointerdown', joyStart);
+        els.zone.addEventListener('pointerdown', function (e) { hideHint(); joyStart(e); });
         els.zone.addEventListener('pointermove', joyMove);
         els.zone.addEventListener('pointerup', joyEnd);
         els.zone.addEventListener('pointercancel', joyEnd);
@@ -139,7 +153,8 @@
       edge.dash = false; edge.item = false;
       return out;
     },
-    usedTouchRecently: function () { return Date.now() - lastTouch < 20000; }
+    usedTouchRecently: function () { return Date.now() - lastTouch < 20000; },
+    hideHint: hideHint
   };
   root.BumperInput = Input;
 }(typeof window !== 'undefined' ? window : this));
