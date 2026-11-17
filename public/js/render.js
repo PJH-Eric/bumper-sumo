@@ -129,6 +129,7 @@
     for (var k = 0; k < s.items.length; k++) Art.drawItemBox(ctx, W(s.items[k].x), H(s.items[k].y), u, t, s.items[k].ghost);
 
     /* 車子（依 y 排序做前後） */
+    this._tags = [];
     var cars = s.cars.slice().sort(function (a, c) { return a.y - c.y; });
     var ghosts = [];
     for (var i = 0; i < cars.length; i++) {
@@ -138,6 +139,7 @@
     }
     /* 掉落中與幽靈畫在最上層 */
     for (var g = 0; g < ghosts.length; g++) this.drawGhost(ctx, ghosts[g], cx, cy, u, t, view, s);
+    this.drawTags(ctx, u);   // 名牌最後統一排版，不被其他車蓋住、也不互相疊
 
     /* 粒子 */
     this.drawParticles(ctx, W, H, u, dt);
@@ -326,23 +328,48 @@
       ctx.restore();
     }
     if (this.opts.names && !c.dummy && !(mine && tagName === this.labels.you)) {
+      /* 名牌先收集，等所有車畫完再統一排版（避免車擠在一起時名牌互相疊住） */
       var name = tagName;
-      ctx.save();
-      var fs = Math.max(11, Math.round(u * 0.26));
-      ctx.font = '800 ' + fs + 'px "Baloo 2", "Noto Sans TC", system-ui, sans-serif';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      var tw = ctx.measureText(name).width + fs * 0.8;
-      var ny = y + u * 0.72 - lift;
-      ctx.fillStyle = mine ? 'rgba(255,255,255,0.95)' : 'rgba(20,18,40,0.6)';
-      Art.rr(ctx, x - tw / 2, ny - fs * 0.62, tw, fs * 1.24, fs * 0.62); ctx.fill();
-      ctx.fillStyle = mine ? '#1d1840' : '#fff';
-      ctx.fillText(name, x, ny + 1);
-      if (c.item && (mine || view.showItems)) {
-        ctx.fillStyle = 'rgba(255,255,255,0.9)'; Art.circle(ctx, x + tw / 2 + fs * 0.55, ny, fs * 0.6); ctx.fill();
-        Art.drawItemIcon(ctx, c.item, x + tw / 2 + fs * 0.55, ny, fs * 0.95);
-      }
-      ctx.restore();
+      if (u < 26 && !mine) name = name.replace(/\s*[（(][^）)]*[）)]\s*$/, '');   // 手機上車很小：電腦名牌省略難度，只留名字
+      (this._tags || (this._tags = [])).push({ x: x, y: y + u * 0.72 - lift, name: name, mine: mine, item: (c.item && (mine || view.showItems)) ? c.item : null });
     }
+  };
+
+  /** 名牌排版：自己的優先，其他依序放；會疊到已放好的就往下挪一格、再不行往上，都不行就半透明 */
+  Renderer.prototype.drawTags = function (ctx, u) {
+    var tags = this._tags || []; this._tags = [];
+    if (!tags.length) return;
+    tags.sort(function (a, b) { return (b.mine ? 1 : 0) - (a.mine ? 1 : 0); });
+    var fs = Math.max(11, Math.round(u * 0.26)), h = fs * 1.24, placed = [];
+    ctx.save();
+    ctx.font = '800 ' + fs + 'px "Baloo 2", "Noto Sans TC", system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    var hit = function (r) { for (var i = 0; i < placed.length; i++) { var q = placed[i]; if (r.l < q.r && r.r > q.l && r.t < q.b && r.b > q.t) return true; } return false; };
+    for (var i = 0; i < tags.length; i++) {
+      var g = tags[i];
+      var tw = ctx.measureText(g.name).width + fs * 0.8, extra = g.item ? fs * 1.3 : 0;
+      var offs = [0, h * 1.08, h * 2.16, -h * 1.08], ny = g.y, alpha = 1, r;
+      for (var k = 0; k < offs.length; k++) {
+        r = { l: g.x - tw / 2, r: g.x + tw / 2 + extra, t: g.y + offs[k] - h / 2, b: g.y + offs[k] + h / 2 };
+        if (!hit(r)) { ny = g.y + offs[k]; break; }
+        if (k === offs.length - 1) { ny = g.y; alpha = 0.4; r = { l: 0, r: 0, t: 0, b: 0 }; }
+      }
+      placed.push(r);
+      ctx.globalAlpha = alpha;
+      if (ny !== g.y) {   // 挪開時畫一條小引線，看得出是哪台車的
+        ctx.strokeStyle = 'rgba(20,18,40,0.45)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(g.x, g.y - h * 0.3); ctx.lineTo(g.x, ny - h / 2); ctx.stroke();
+      }
+      ctx.fillStyle = g.mine ? 'rgba(255,255,255,0.95)' : 'rgba(20,18,40,0.66)';
+      Art.rr(ctx, g.x - tw / 2, ny - fs * 0.62, tw, h, fs * 0.62); ctx.fill();
+      ctx.fillStyle = g.mine ? '#1d1840' : '#fff';
+      ctx.fillText(g.name, g.x, ny + 1);
+      if (g.item) {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'; Art.circle(ctx, g.x + tw / 2 + fs * 0.55, ny, fs * 0.6); ctx.fill();
+        Art.drawItemIcon(ctx, g.item, g.x + tw / 2 + fs * 0.55, ny, fs * 0.95);
+      }
+    }
+    ctx.restore();
   };
 
   Renderer.prototype.drawGhost = function (ctx, c, cx, cy, u, t, view, s) {
