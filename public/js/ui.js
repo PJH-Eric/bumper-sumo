@@ -20,10 +20,19 @@
       var m = $(typeof id === 'string' && id.charAt(0) !== '#' ? '#' + id : id);
       if (!m || stack.some(function (s) { return s.m === m; })) return;
       var entry = { m: m, prev: doc.activeElement, opts: opts || {}, inert: [] };
-      Array.prototype.forEach.call(doc.body.children, function (n) {
-        if (n === m || n.contains(m) || n.classList.contains('topbar-global') || n.tagName === 'SCRIPT') return;
-        entry.inert.push([n, n.inert]); n.inert = true;
-      });
+      /* 背景設為 inert，但右上角語言＋設定工具列保持可用（彈窗開著也能切換語言） */
+      var keep = doc.querySelector('.topbar-global');
+      var lockOut = function (parent) {
+        Array.prototype.forEach.call(parent.children, function (n) {
+          if (n === m || n.tagName === 'SCRIPT' || n === keep) return;
+          if (n.contains(m) || (keep && n.contains(keep))) { lockOut(n); return; }
+          if (stack.some(function (s) { return s.m === n; })) return;
+          entry.inert.push([n, n.inert]); n.inert = true;
+        });
+      };
+      lockOut(doc.body);
+      /* 疊在另一個彈窗上（例如設定裡的清除確認）：先前被設成 inert 的自己要解除 */
+      m.inert = false;
       stack.push(entry);
       m.hidden = false;
       m.classList.add('open');

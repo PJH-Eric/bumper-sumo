@@ -407,12 +407,13 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
 .item-cell span { font-size: .88rem; color: var(--muted); }
 
 /* ---------- 彈窗 ---------- */
-.modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: calc(70px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l)); background: rgba(10,6,30,.66); }
+.modal { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; padding: calc(70px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l)); background: rgba(10,6,30,.66); }
 .modal-card { width: min(560px, 100%); max-height: 100%; display: flex; flex-direction: column; border-radius: 24px; background: linear-gradient(180deg, var(--panel2), var(--panel)); box-shadow: 0 8px 0 #160f3a, inset 0 0 0 3px rgba(255,233,163,.25); animation: rise .25s ease-out; }
 .modal-card.small { width: min(400px, 100%); }
 .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 14px 6px 20px; }
 .modal-head h2 { margin: 0; font-size: 1.5rem; color: var(--yellow); }
 .modal-body { flex: 1 1 auto; min-height: 0; }
+.modal-head, .modal-foot { flex: none; }
 .modal-body > .sa-view > *, .modal-body > p { margin-left: 20px; margin-right: 20px; }
 .modal-body .sa-view { padding: 0 0 8px; }
 .modal-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 10px 20px 18px; flex-wrap: wrap; }

@@ -60,7 +60,7 @@
           lastMsg = Date.now();
           socket.emit('hello', { sid: sid || getSid(), name: profile().name, skin: profile().skin }, function (r) {
             if (r && r.ok) { sid = r.sid; saveSid(sid); }
-            setStatus('connected', { room: r && r.room });
+            setStatus('connected', { room: r && r.room, online: r && r.online });
           });
         });
         socket.on('disconnect', function (why) { setStatus(why === 'io client disconnect' ? 'idle' : 'reconnecting'); });
