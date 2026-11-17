@@ -21,7 +21,7 @@
     'solo.cpuLevel': '{name} 的難度', 'solo.less': '少一台', 'solo.more': '多一台',
     'solo.rules': '這局設定', 'solo.session': '本局難度', 'solo.sessionSub': '決定你的邊緣搶救時間與擂台最後大小',
     'solo.auto': '跟電腦最高一樣（{lv}）', 'solo.theme': '擂台主題', 'solo.items': '道具', 'solo.itemsSub': '關掉時幽靈也不能丟道具',
-    'solo.start': '開始比賽！',
+    'solo.start': '開始比賽！', 'solo.teamSub': '組隊時電腦數量固定；藍隊是你這隊', 'solo.ally': '隊友', 'solo.rival': '對手',
 
     'lv.kid': '幼幼', 'lv.easy': '簡單', 'lv.normal': '普通', 'lv.hard': '困難', 'lv.mythic': '神話', 'lv.tag': '（{lv}）',
     'animal.bear': '小熊', 'animal.cat': '小貓', 'animal.frog': '青蛙', 'animal.chick': '小雞', 'animal.rabbit': '兔兔',
@@ -163,7 +163,7 @@
     'solo.cpuLevel': '{name} level', 'solo.less': 'One fewer', 'solo.more': 'One more',
     'solo.rules': 'Match settings', 'solo.session': 'Match difficulty', 'solo.sessionSub': 'Sets your edge-rescue time and how small the arena gets',
     'solo.auto': 'Same as top CPU ({lv})', 'solo.theme': 'Arena theme', 'solo.items': 'Items', 'solo.itemsSub': 'When off, ghosts can’t drop items either',
-    'solo.start': 'Start the match!',
+    'solo.start': 'Start the match!', 'solo.teamSub': 'CPU count is fixed in team modes; Blue is your team', 'solo.ally': 'Ally', 'solo.rival': 'Rival',
 
     'lv.kid': 'Toddler', 'lv.easy': 'Easy', 'lv.normal': 'Normal', 'lv.hard': 'Hard', 'lv.mythic': 'Mythic', 'lv.tag': ' ({lv})',
     'animal.bear': 'Bear', 'animal.cat': 'Kitty', 'animal.frog': 'Frog', 'animal.chick': 'Chick', 'animal.rabbit': 'Bunny',

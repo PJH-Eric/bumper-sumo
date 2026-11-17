@@ -106,6 +106,7 @@
     if (langDD) langDD.refresh();
     Object.keys(dds).forEach(function (k) { if (dds[k]) dds[k].refresh(); });
     if (countUI) countUI.refresh();
+    if (countUI && dds.soloMode) applySoloMode();
     if (roomMax) roomMax.refresh();
     if (prCount) prCount.refresh();
     renderStats();
@@ -201,6 +202,11 @@
         soloSave(); renderCpuList(); updateSessionLabel();
       }
     });
+    dds.soloMode = UI.Select('#solo-mode', {
+      value: S.soloCfg.mode || 'ffa', portal: true, aria: function () { return t('room.mode'); },
+      options: ['ffa', '2v2', '3v3'].map(function (m) { return { value: m, label: function () { return t('mode.' + m); } }; }),
+      onChange: function (v) { S.soloCfg.mode = v; applySoloMode(); soloSave(); renderCpuList(); updateSessionLabel(); }
+    });
     dds.session = UI.Select('#solo-session', {
       value: S.soloCfg.session, portal: true,
       aria: function () { return t('solo.session'); },
@@ -217,6 +223,18 @@
     items.set(S.soloCfg.items !== false, true);
     $('solo-start').addEventListener('click', function () { Audio.unlock(); startSolo(); });
   }
+  /** 組隊：2 對 2 固定 3 台電腦、3 對 3 固定 5 台；你的隊友是第 2、4 台電腦 */
+  function applySoloMode() {
+    var m = S.soloCfg.mode || 'ffa';
+    var need = m === '2v2' ? 3 : (m === '3v3' ? 5 : 0);
+    if (need) {
+      while (S.soloCfg.cpus.length < need) S.soloCfg.cpus.push('normal');
+      S.soloCfg.cpus.length = need;
+    }
+    if (countUI) { countUI.set(S.soloCfg.cpus.length); Array.prototype.forEach.call(doc.querySelectorAll('#solo-count button'), function (b) { if (need) b.disabled = true; }); if (!need) countUI.refresh(); }
+    $('solo-mode-sub').textContent = need ? t('solo.teamSub') : '';
+  }
+  function soloTeam(i) { return i % 2; }   // 0＝你，1、3、5 是對手隊，2、4 是你的隊友（索引含你）
   function autoLevel() {
     var best = 0;
     S.soloCfg.cpus.forEach(function (l) { best = Math.max(best, LEVELS.indexOf(l)); });
@@ -232,10 +250,16 @@
     var list = $('solo-cpu-list');
     list.innerHTML = '';
     var skins = cpuSkins();
+    var teams = (S.soloCfg.mode || 'ffa') !== 'ffa';
     S.soloCfg.cpus.forEach(function (lv, i) {
       var li = UI.el('li', 'cpu-row');
       var cv = UI.el('canvas'); li.appendChild(cv); drawCarPreview(cv, skins[i], 'happy', 48);
       var nm = UI.el('span', 'cpu-name'); nm.textContent = animalName(skins[i]); li.appendChild(nm);
+      if (teams) {
+        var tm = soloTeam(i + 1);
+        var tg = UI.el('span', 'tag team-tag'); tg.style.background = TEAM_COLORS[tm]; tg.textContent = tm === 0 ? t('solo.ally') : t('solo.rival');
+        nm.appendChild(doc.createTextNode(' ')); nm.appendChild(tg);
+      }
       var dd = UI.el('div'); li.appendChild(dd);
       list.appendChild(li);
       UI.Select(dd, {
@@ -264,7 +288,8 @@
   }
   function openSolo() {
     show('solo');
-    renderSoloCars(); renderCpuList(); countUI.set(S.soloCfg.cpus.length); updateSessionLabel();
+    countUI.set(S.soloCfg.cpus.length); dds.soloMode.set(S.soloCfg.mode || 'ffa'); applySoloMode();
+    renderSoloCars(); renderCpuList(); updateSessionLabel();
     dds.theme.set(S.soloCfg.theme);
     setTimeout(drawThemePreview, 30);
   }
@@ -277,12 +302,13 @@
     ensureRenderer();
     var cfg = S.soloCfg;
     var skins = cpuSkins();
-    var cars = [{ id: 'me', skin: cfg.skin, human: true }];
-    cfg.cpus.forEach(function (lv, i) { cars.push({ id: 'cpu' + i, skin: skins[i], level: lv }); });
+    var teams = (cfg.mode || 'ffa') !== 'ffa';
+    var cars = [{ id: 'me', skin: cfg.skin, human: true, team: teams ? 0 : 0 }];
+    cfg.cpus.forEach(function (lv, i) { cars.push({ id: 'cpu' + i, skin: skins[i], level: lv, team: teams ? soloTeam(i + 1) : i + 1 }); });
     var session = cfg.session === 'auto' ? autoLevel() : cfg.session;
     var seed = 'solo:' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     S.mode = 'solo'; S.myId = 'me';
-    S.match = R.createMatch({ seed: seed, cars: cars, items: cfg.items !== false, sessionLevel: session, mode: 'solo', theme: cfg.theme });
+    S.match = R.createMatch({ seed: seed, cars: cars, items: cfg.items !== false, sessionLevel: session, mode: 'solo', theme: cfg.theme, teams: teams });
     S.brains = {};
     S.match.cars.forEach(function (c) { if (!c.human) S.brains[c.id] = AI.create(c.level, seed + c.id); });
     renderer.setTheme(cfg.theme, seed);

@@ -512,3 +512,4 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 @media (max-width: 640px) {
   .scr-head .conn, .scr-head .online-n { font-size: .75rem; padding: 3px 8px; }
 }
+.team-tag { color: #fff; margin-left: 4px; }

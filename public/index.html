@@ -14,6 +14,7 @@
 <link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png">
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/lobby-chat.css">
 <link rel="stylesheet" href="css/latency.css">
@@ -69,6 +70,7 @@
         </section>
         <section class="panel">
           <h3 data-i18n="solo.cpus">電腦對手</h3>
+          <div class="row"><span class="row-label"><span data-i18n="room.mode">模式</span><small id="solo-mode-sub"></small></span><div id="solo-mode"></div></div>
           <div class="row"><span class="row-label" data-i18n="solo.cpuCount">電腦數量</span><div id="solo-count"></div></div>
           <ol class="cpu-list" id="solo-cpu-list"></ol>
         </section>
