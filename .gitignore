@@ -1,0 +1,24 @@
+node_modules/
+npm-debug.log*
+.env
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+coverage/
+dist/
+screenshots/
+
+# 可重新產生的測試截圖、暫存與快取
+/shots/
+/.shots/
+/test-results/
+/playwright-report/
+/.cache/
+*.tmp
+*.bak
+/tmp/
+/temp/
