@@ -375,7 +375,7 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
 @keyframes rise { from { transform: translateY(30px) scale(.96); opacity: 0; } }
 .result-card h2 { margin: 0; text-align: center; font-size: clamp(1.6rem, 5vw, 2.4rem); color: var(--yellow); text-shadow: 0 3px 0 rgba(0,0,0,.4); }
 .result-sub { margin: 0; text-align: center; color: var(--muted); font-weight: 700; }
-.result-scroll { position: relative; flex: 1 1 auto; min-height: 120px; }
+.result-scroll { position: relative; flex: 1 1 auto; min-height: 96px; }
 /* 內容超出時：底部漸層＋常駐自訂捲軸，看得出來可以往下捲 */
 .result-scroll.sa-over:not(.sa-end)::after { content: ""; position: absolute; left: 0; right: 14px; bottom: 0; height: 36px; pointer-events: none; background: linear-gradient(rgba(43,34,102,0), var(--panel)); border-radius: 0 0 12px 12px; }
 .result-card > :not(.result-scroll) { flex: none; }
@@ -464,11 +464,17 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .home-menu .big-btn { min-height: 64px; }
   .home-menu { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .scr-head { min-height: 58px; }
-  .result { padding-top: calc(10px + var(--safe-t)); }
+  /* 矮橫向：結算卡往上貼頂，但要讓開右上角的語言／設定鈕（約 200px 寬），不能被蓋住 */
+  .result { padding-top: calc(10px + var(--safe-t)); padding-right: calc(214px + var(--safe-r)); }
   .result-card { padding: 12px; }
   .result-actions { grid-template-columns: repeat(4, 1fr); }
   .result-actions #res-again { grid-column: auto; }
   .result-actions .big-btn { min-height: 48px; font-size: 1rem; padding: 6px 10px; }
+}
+/* 矮又窄的橫向（如 667×375）：右邊讓不出 200px，改成讓出頂端那一列 */
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 779px) {
+  .result { padding-top: calc(66px + var(--safe-t)); padding-right: calc(12px + var(--safe-r)); }
+  .result-card h2 { font-size: 1.4rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -501,7 +507,8 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 .recent .pl.gold { background: var(--yellow); color: var(--ink); }
 .recent .rc-main { flex: 1 1 200px; min-width: 0; }
 .recent .rc-date { color: var(--muted); font-size: .82rem; }
-.result-new { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.result-new { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding-right: 12px; }
+.result-new:not(:empty) { margin-bottom: 8px; }   /* 新紀錄／成就徽章放在捲動區最上面，跟名次一起捲，不會把按鈕擠出畫面 */
 .chip { padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: .88rem; background: rgba(255,255,255,.12); }
 .chip.best { background: rgba(78,224,122,.25); color: #c9ffd8; }
 .chip.ach { background: rgba(255,210,63,.25); color: #fff2b8; }
