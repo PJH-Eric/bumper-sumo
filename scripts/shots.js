@@ -41,7 +41,7 @@ async function run() {
     await page.waitForTimeout(1500); await shot('game');
     /* 直接跑到結束：把其他車丟出場 */
     await page.evaluate(() => { const S = window.BumperApp.S; S.match.cars.forEach((c) => { if (c.id !== 'me') { c.x = 40; c.lastHit = { by: 'me', t: S.match.t }; } }); });
-    await page.waitForTimeout(2200); await shot('result');
+    await page.waitForSelector('#result:not([hidden])', { timeout: 6000 }).catch(() => {}); await page.waitForTimeout(400); await shot('result');
     await page.click('#res-share'); await page.waitForSelector('#share-img:not([hidden])', { timeout: 8000 }).catch(() => {}); await page.waitForTimeout(200); await shot('share');
     await page.keyboard.press('Escape'); await page.waitForTimeout(200);
     await page.click('#btn-settings'); await page.waitForTimeout(300); await shot('settings');
