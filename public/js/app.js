@@ -104,9 +104,23 @@
       onChange: function (v) { I18N.setLang(v); }
     });
     I18N.on(function () { refreshTexts(); });
+    watchGW();
+  }
+  /* 右上角語言＋設定鈕的實際寬度（含安全區）寫進 --gw，標題列／HUD／結算卡依此讓位；換語系、轉向、字型載入都會重量 */
+  function measureGW() {
+    var g = doc.querySelector('.topbar-global'); if (!g) return;
+    var r = g.getBoundingClientRect(); if (!r.width) return;
+    doc.documentElement.style.setProperty('--gw', Math.ceil(w.innerWidth - r.left + 8) + 'px');
+  }
+  function watchGW() {
+    measureGW();
+    w.addEventListener('resize', measureGW);
+    if (w.ResizeObserver) new w.ResizeObserver(measureGW).observe(doc.querySelector('.topbar-global'));
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(measureGW);
   }
   function refreshTexts() {
     if (langDD) langDD.refresh();
+    w.requestAnimationFrame(measureGW);
     Object.keys(dds).forEach(function (k) { if (dds[k]) dds[k].refresh(); });
     if (countUI) countUI.refresh();
     if (countUI && dds.soloMode) applySoloMode();

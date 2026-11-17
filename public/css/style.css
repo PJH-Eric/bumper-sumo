@@ -168,7 +168,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
 .scr-head {
   flex: none; display: flex; align-items: center; gap: 12px; min-height: 68px;
-  padding: calc(10px + var(--safe-t)) calc(196px + var(--safe-r)) 8px calc(12px + var(--safe-l));
+  padding: calc(10px + var(--safe-t)) calc(var(--gw, 196px) + 8px) 8px calc(12px + var(--safe-l));   /* --gw＝右上角語言＋設定鈕實際佔的寬度（app 依語系量測） */
 }
 .scr-head h2 { margin: 0; font-size: clamp(1.25rem, 3.6vw, 1.8rem); line-height: 1.1; text-shadow: 0 3px 0 rgba(0,0,0,.35); min-width: 0; overflow-wrap: anywhere; }
 .back-btn { width: 48px; height: 48px; flex: none; border: 0; border-radius: 14px; background: var(--panel2); cursor: pointer; display: grid; place-items: center; box-shadow: 0 4px 0 #18113d; }
@@ -353,7 +353,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 
 .stage { position: relative; flex: 1; min-width: 0; overflow: hidden; touch-action: none; }
 #game-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.hud-top { position: absolute; z-index: 10; top: calc(10px + var(--safe-t)); left: 10px; right: calc(10px + var(--safe-r)); display: flex; align-items: center; gap: 10px; pointer-events: none; padding-right: 210px; }
+.hud-top { position: absolute; z-index: 10; top: calc(10px + var(--safe-t)); left: 10px; right: calc(10px + var(--safe-r)); display: flex; align-items: center; gap: 10px; pointer-events: none; padding-right: var(--gw, 210px); }
 .hud-top > * { pointer-events: auto; }
 .hud-bar { display: flex; align-items: center; gap: 12px; padding: 4px 14px; min-height: 44px; border-radius: 999px; background: rgba(20,14,50,.75); font-weight: 800; }
 .hud-time { font-size: 1.4rem; min-width: 2.2em; text-align: center; font-variant-numeric: tabular-nums; }
@@ -488,15 +488,11 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .car-card span { font-size: .78rem; }
   .how-card { grid-template-columns: 1fr; }
   .how-card canvas { width: 100%; max-width: 320px; height: auto; aspect-ratio: 4 / 3; margin: 0 auto; }
-  .scr-head { padding-right: calc(130px + var(--safe-r)); }
-  .hud-top { padding-right: 120px; }
   .go-btn { min-width: 0; flex: 1 1 160px; }
 }
 @media (max-width: 420px) {
   .dd-lang .dd-label { display: none; }
   .dd-lang .dd-btn { min-width: 48px; padding: 6px 8px; }
-  .scr-head { padding-right: calc(124px + var(--safe-r)); }
-  .hud-top { padding-right: 116px; }
 }
 @media (max-height: 520px) and (orientation: landscape) {
   .home-inner { padding-top: calc(64px + var(--safe-t)); gap: 10px; justify-content: flex-start; }
@@ -505,7 +501,7 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .home-menu { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .scr-head { min-height: 58px; }
   /* 矮橫向：結算卡往上貼頂，但要讓開右上角的語言／設定鈕（約 200px 寬），不能被蓋住 */
-  .result { padding-top: calc(10px + var(--safe-t)); padding-right: calc(214px + var(--safe-r)); }
+  .result { padding-top: calc(10px + var(--safe-t)); padding-right: calc(var(--gw, 214px) + 12px); }
   .result-card { padding: 12px; }
   .result-actions { grid-template-columns: repeat(4, 1fr); }
   .result-actions #res-again { grid-column: auto; }
