@@ -194,11 +194,11 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .hint { color: var(--muted); font-size: .9rem; margin: 8px 0 0; }
 .err { color: #ff9aa5; font-weight: 700; min-height: 1.2em; margin: 6px 0 0; }
 .toast {
-  position: fixed; z-index: 90; left: 50%; bottom: calc(24px + var(--safe-b)); transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
+  position: fixed; z-index: 90; left: calc(10px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; bottom: calc(24px + var(--safe-b)); transform: translateY(30px);   /* 置中用左右＋auto，避免 left:50% 讓可用寬度只剩一半、長訊息被擠成窄條 */ opacity: 0; pointer-events: none;
   max-width: min(92vw, 460px); padding: 12px 18px; border-radius: 14px; background: #fff; color: var(--ink); font-weight: 800; text-align: center;
   box-shadow: 0 6px 0 rgba(0,0,0,.3); transition: opacity .2s, transform .2s;
 }
-.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.show { opacity: 1; transform: translateY(0); }
 .toast.bad { background: #ffd4d9; }
 
 /* ---------- 首頁 ---------- */
@@ -361,7 +361,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .hud-alive { color: var(--muted); }
 .role-pill { padding: 4px 12px; border-radius: 999px; background: rgba(47,214,245,.25); font-weight: 800; }
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
-.ghost-tip { position: absolute; z-index: 9; left: 50%; top: calc(64px + var(--safe-t)); transform: translateX(-50%); max-width: min(90%, 520px); padding: 8px 16px; border-radius: 14px; background: rgba(156,123,255,.85); font-weight: 800; text-align: center; pointer-events: none; }
+.ghost-tip { position: absolute; z-index: 9; left: calc(10px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); max-width: min(90%, 520px); padding: 8px 16px; border-radius: 14px; background: rgba(156,123,255,.85); font-weight: 800; text-align: center; pointer-events: none; }
 .countdown {
   position: absolute; z-index: 25; inset: 0; display: grid; place-items: center; pointer-events: none;
   font: 900 clamp(96px, 26vmin, 220px)/1 var(--font); color: #fff; -webkit-text-stroke: 10px var(--ink); paint-order: stroke fill;
@@ -412,7 +412,7 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .pr-row .btn.small { padding-left: 10px; padding-right: 10px; }
 }
 .rotate-tip .btn { flex: none; white-space: nowrap; }
-.rotate-tip { position: absolute; z-index: 11; left: 50%; top: calc(64px + var(--safe-t)); transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 6px 8px 6px 14px; border-radius: 14px; background: rgba(20,14,50,.85); font-weight: 800; max-width: calc(100% - 20px); }
+.rotate-tip { position: absolute; z-index: 11; left: calc(10px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); display: flex; gap: 10px; align-items: center; padding: 6px 8px 6px 14px; border-radius: 14px; background: rgba(20,14,50,.85); font-weight: 800; max-width: calc(100% - 20px); }
 
 /* 結算（疊在擂台上） */
 .result { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: calc(64px + var(--safe-t)) 12px calc(12px + var(--safe-b)); background: rgba(16,10,40,.55); backdrop-filter: blur(2px); }
@@ -604,7 +604,7 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 @keyframes hintIn { from { opacity: 0; transform: translateY(10px); } }
 body:not(.touch-on) .touch-hint { display: none; }
 /* 鍵盤提示（桌機）：擂台下方中間，自繪鍵帽 */
-.key-hint { position: absolute; z-index: 9; left: 50%; bottom: calc(18px + var(--safe-b)); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; max-width: calc(100% - 300px); padding: 10px 16px; border-radius: 16px; background: rgba(20,14,50,.86); box-shadow: 0 4px 0 rgba(0,0,0,.3); pointer-events: none; animation: hintIn .4s ease-out; }
+.key-hint { position: absolute; z-index: 9; left: 150px; right: 150px; margin: 0 auto; width: fit-content; bottom: calc(18px + var(--safe-b)); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; padding: 10px 16px; border-radius: 16px; background: rgba(20,14,50,.86); box-shadow: 0 4px 0 rgba(0,0,0,.3); pointer-events: none; animation: hintIn .4s ease-out; }
 .kh-grp { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-weight: 800; }
 .kh-grp b { margin-left: 4px; }
 .kh-grp i { font-style: normal; color: var(--muted); margin: 0 2px; }
