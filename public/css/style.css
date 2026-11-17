@@ -397,12 +397,20 @@ body:not(.touch-on) .touch { display: block; }
 body:not(.touch-on) .joy-zone { display: none; }
 body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
 
-.practice-bar { position: absolute; z-index: 12; left: 50%; transform: translateX(-50%); top: calc(64px + var(--safe-t)); display: flex; flex-direction: column; gap: 6px; align-items: center; max-width: calc(100% - 20px); padding: 8px 10px; border-radius: 16px; background: rgba(20,14,50,.82); }
+.practice-bar { position: absolute; z-index: 12; left: calc(66px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); display: flex; flex-direction: column; gap: 6px; align-items: center; max-width: calc(100% - 20px);   /* 不用 left:50%＋translate（那樣可用寬度只剩一半，道具會被擠成兩排） */ padding: 8px 10px; border-radius: 16px; background: rgba(20,14,50,.82); }
 .pr-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .pr-items button { width: 48px; height: 48px; border: 0; border-radius: 12px; background: rgba(255,255,255,.14); cursor: pointer; display: grid; place-items: center; box-shadow: 0 3px 0 rgba(0,0,0,.3); }
 .pr-items canvas { width: 36px; height: 36px; }
 .pr-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .pr-row .row-label { flex: none; }
+@media (max-width: 480px) {   /* 窄手機：工具列讓開左上角☰，道具鈕 44px、間距縮小，盡量一排放完 */
+  .practice-bar { padding: 6px 8px; }
+  .pr-items { gap: 4px; }
+  .pr-items button { width: 44px; height: 44px; }
+  .pr-items canvas { width: 32px; height: 32px; }
+  .pr-row { gap: 5px; }
+  .pr-row .btn.small { padding-left: 10px; padding-right: 10px; }
+}
 .rotate-tip .btn { flex: none; white-space: nowrap; }
 .rotate-tip { position: absolute; z-index: 11; left: 50%; top: calc(64px + var(--safe-t)); transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 6px 8px 6px 14px; border-radius: 14px; background: rgba(20,14,50,.85); font-weight: 800; max-width: calc(100% - 20px); }
 
