@@ -29,7 +29,7 @@
     if (id === 'home') { startHero(); renderStats(); } else stopHero();
     if (id !== 'game') { Audio.music(true, 'menu'); }
     if (LobbyChatUI) LobbyChatUI.refresh();
-    if (id === 'room') dockChat('room'); else if (id === 'game') dockChat('game');
+    if (id === 'room') { dockChat('room'); w.requestAnimationFrame(placeRoomChat); } else if (id === 'game') dockChat('game');
     if (id !== 'room') doc.body.classList.remove('room-chat-full');
     UI.refreshScroll();
     var f = doc.querySelector('#s-' + id + ' .back-btn, #s-' + id + ' .big-btn');
@@ -413,9 +413,10 @@
   function updateInsets() {
     var cv = $('game-cv'); if (!cv || !renderer) return;
     var cr = cv.getBoundingClientRect();
-    if (cr.height < cr.width * 1.1) { renderer.setInsets(0, 0); return; }
+    var pb = $('practice-bar'), pTop = (pb && !pb.hidden) ? pb.getBoundingClientRect().bottom - cr.top + 6 : 0;   // 自由練習的工具列也要讓開
+    if (cr.height < cr.width * 1.1) { renderer.setInsets(pTop && cr.height - pTop >= cr.height * 0.75 ? pTop : 0, 0); return; }   // 橫向：讓開工具列後擂台還夠大才讓（矮手機維持原樣）
     var top = 0, bottom = 0, hb = doc.querySelector('#s-game .hud-top');
-    if (hb) top = hb.getBoundingClientRect().bottom - cr.top + 4;
+    if (hb) top = Math.max(hb.getBoundingClientRect().bottom - cr.top + 4, pTop);
     if (doc.body.classList.contains('touch-on')) {
       var lowest = cr.bottom;
       ['.tbtns', '.joy-base'].forEach(function (sel) { var e = doc.querySelector('#s-game ' + sel); if (e) { var r = e.getBoundingClientRect(); if (r.height) lowest = Math.min(lowest, r.top); } });
@@ -1138,6 +1139,11 @@
     } else if (chat.parentNode !== $('side-body')) $('side-body').appendChild(chat);
     if (chatSA) setTimeout(function () { chatSA.toBottom(); }, 0);
   }
+  /* 房間聊天氣泡放在底部按鈕列上方（手機按鈕列可能兩行，高度不固定） */
+  function placeRoomChat() {
+    var f = doc.querySelector('#s-room .room-foot'); if (!f || !f.offsetHeight) return;
+    $('room-chat').style.setProperty('--rc-bottom', (f.offsetHeight + 12) + 'px');
+  }
   function roomChatVisible() { return w.matchMedia(ROOM_CHAT_WIDE).matches || $('room-chat').classList.contains('open'); }
   function roomChatSet(open, focus) {
     $('room-chat').classList.toggle('open', open);
@@ -1148,6 +1154,8 @@
     UI.refreshScroll();
   }
   function bindRoomChat() {
+    w.addEventListener('resize', function () { if (S.screen === 'room') placeRoomChat(); });
+    if (w.ResizeObserver) new w.ResizeObserver(function () { if (S.screen === 'room') placeRoomChat(); }).observe(doc.querySelector('#s-room .room-foot'));
     $('room-chat-fab').addEventListener('click', function () { roomChatSet(!$('room-chat').classList.contains('open'), true); });
     $('room-chat-close').addEventListener('click', function () { roomChatSet(false, true); });
     $('room-chat').addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('room-chat').classList.contains('open') && !w.matchMedia(ROOM_CHAT_WIDE).matches) { e.stopPropagation(); roomChatSet(false, true); } });

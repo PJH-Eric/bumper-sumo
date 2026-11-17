@@ -301,8 +301,16 @@
     /* 自己的車頭上：會上下跳的「你」指標（關掉名牌也一直顯示，避免找不到自己） */
     if (mine) this.drawMePin(ctx, x, y - lift - (c.wobble > 0 ? u * 0.6 : 0) - (c.fx.spin > 0 ? u * 0.35 : 0), u, t);
     /* 名牌 */
-    if (this.opts.names && !c.dummy) {
-      var name = view.nameOf ? view.nameOf(c) : c.name;
+    var tagName = view.nameOf ? view.nameOf(c) : c.name;
+    if (mine && tagName === this.labels.you && c.item) {   // 單機時名牌也是「你」，頭上已有指標就不重複，只留持有道具的小圖示
+      ctx.save();
+      var ifs = Math.max(11, Math.round(u * 0.26)), iy = y + u * 0.72 - lift;
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; Art.circle(ctx, x, iy, ifs * 0.7); ctx.fill();
+      Art.drawItemIcon(ctx, c.item, x, iy, ifs * 1.1);
+      ctx.restore();
+    }
+    if (this.opts.names && !c.dummy && !(mine && tagName === this.labels.you)) {
+      var name = tagName;
       ctx.save();
       var fs = Math.max(11, Math.round(u * 0.26));
       ctx.font = '800 ' + fs + 'px "Baloo 2", "Noto Sans TC", system-ui, sans-serif';
