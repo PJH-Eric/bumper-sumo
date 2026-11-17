@@ -1017,7 +1017,7 @@
       } else if (st === 'reconnecting' || st === 'retrying' || st === 'connecting') {
         setConn('lobby-conn', 'wait', t('online.reconnecting')); setConn('room-conn', 'wait', t('online.reconnecting'));
       } else if (st === 'error') { setConn('lobby-conn', 'bad', t('online.failed')); }
-      if (LobbyChatUI) LobbyChatUI.setConnected(st === 'connected');
+      if (LobbyChatUI) { LobbyChatUI.setConnected(st === 'connected'); LobbyChatUI.refresh(); }   // 連線狀態變了要重新判斷是否顯示（進大廳當下多半還沒連上）
     });
     Net.on('room:list', function (p) { if (S.screen === 'lobby') renderRoomList(p.rooms); });
     Net.on('room:state', onRoomState);

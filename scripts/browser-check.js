@@ -143,6 +143,8 @@ async function main() {
   await A.waitForFunction(() => window.BumperNet.connected(), null, { timeout: 8000 });
   await A.waitForSelector('#lobby-online:not([hidden])', { timeout: 3000 }).catch(() => {});
   ok(await A.isVisible('#lobby-online') && /[0-9]/.test(await A.textContent('#lobby-online')), '線上大廳顯示在線人數');
+  await A.waitForSelector('.lc-root:not([hidden])', { timeout: 3000 }).catch(() => {});
+  ok(await A.isVisible('.lc-root') && await A.evaluate(() => getComputedStyle(document.querySelector('.lc-root')).getPropertyValue('--lc-z').trim() === '65'), '第一次進大廳（連線完成後）就顯示大廳聊天室，且層級低於設定彈窗');
   await A.fill('#lobby-name', '房主'); await A.click('#lobby-create');
   await A.waitForSelector('#s-room:not([hidden])', { timeout: 5000 });
   const invite = (await A.textContent('#room-invite-url')).trim();

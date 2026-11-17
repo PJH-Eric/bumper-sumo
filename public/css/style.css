@@ -595,3 +595,21 @@ body:not(.touch-on) .touch-hint { display: none; }
 .kc { min-width: 28px; height: 28px; padding: 0 6px; border-radius: 7px; display: inline-grid; place-items: center; background: #fff; color: var(--ink); font-weight: 900; font-size: .85rem; box-shadow: 0 3px 0 #9d94c9; }
 .kc-wide { min-width: 52px; }
 body.touch-on .key-hint { display: none; }
+
+/* ---------- 大廳聊天室：套用遊戲的霓虹紫配色（共用元件只透過變數調整，不改元件本身） ---------- */
+body .lc-root {
+  --lc-accent: var(--pink);
+  --lc-accent-ink: #ffffff;
+  --lc-panel-bg: #2b2266;
+  --lc-panel-solid: #241c58;
+  --lc-ink: var(--text);
+  --lc-muted: var(--muted);
+  --lc-line: rgba(255, 233, 163, 0.22);
+  --lc-field-bg: rgba(0, 0, 0, 0.28);
+  --lc-sys-bg: rgba(156, 123, 255, 0.22);
+  --lc-name: var(--cyan);
+  --lc-shadow: 0 6px 0 #160f3a, 0 0 0 3px rgba(255, 233, 163, 0.25);
+  --lc-radius: 18px;
+  --lc-font: var(--font);
+  --lc-z: 65;            /* 高於大廳內容與右上角按鈕（60），低於設定彈窗（70）與提示 */
+}
