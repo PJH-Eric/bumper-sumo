@@ -110,7 +110,7 @@
   function measureGW() {
     var g = doc.querySelector('.topbar-global'); if (!g) return;
     var r = g.getBoundingClientRect(); if (!r.width) return;
-    doc.documentElement.style.setProperty('--gw', Math.ceil(w.innerWidth - r.left + 8) + 'px');
+    doc.documentElement.style.setProperty('--gw', Math.ceil(w.innerWidth - r.left + 2) + 'px');
   }
   function watchGW() {
     measureGW();

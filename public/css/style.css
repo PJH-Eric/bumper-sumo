@@ -564,7 +564,7 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 /* 窄版：標題列的連線／在線人數膠囊換到第二行，標題不被擠成直排 */
 @media (max-width: 640px) {
   .scr-head { flex-wrap: wrap; row-gap: 4px; }
-  .scr-head h2 { flex: 1 1 9em; }
+  .scr-head h2 { flex: 1 1 6em; }   /* 標題優先跟返回鍵同一行，空間不夠時換行的是連線狀態 */
   .scr-head .online-n { margin-left: 60px; }
   .scr-head .online-n[hidden] + .conn { margin-left: 60px; }
 }

@@ -1,5 +1,5 @@
 /* scripts/header-fit-check.js — 7 種尺寸 × 繁中／簡中／English × 5 個畫面：
- * 標題列（返回、標題、連線狀態、在線人數）與對局 HUD 都不被右上角語言／設定鈕蓋住
+ * 標題列（返回、標題、連線狀態、在線人數）與對局 HUD 都不被右上角語言／設定鈕蓋住，且標題跟返回鍵在同一行
  * 用法：先 npm start（port 3250），再 node scripts/header-fit-check.js [baseUrl] */
 const { chromium } = require('playwright-core');
 const fs = require('fs');
@@ -21,6 +21,10 @@ const DEV=[[360,640],[390,844],[844,390],[667,375],[820,1180],[1180,820],[1440,9
         const hits = [...document.querySelectorAll(sel)].filter(e => { const r = e.getBoundingClientRect(); if (!r.width || getComputedStyle(e).display==='none' || e.hidden) return false; return !(r.right <= g.left || r.left >= g.right || r.bottom <= g.top || r.top >= g.bottom); }).map(e => e.id || e.className);
         return hits; }, scr);
       if (r.length) { bad++; console.log('✗', lang, w+'x'+h, scr, r.join(',')); }
+      if (scr !== 'game') {   // 標題要跟返回鍵同一行（不能被擠到第二行）
+        const same = await p.evaluate((s) => { const bb = document.querySelector('#s-' + s + ' .back-btn').getBoundingClientRect(), hh = document.querySelector('#s-' + s + ' .scr-head h2').getBoundingClientRect(); return hh.top < bb.bottom && hh.bottom > bb.top; }, scr);
+        if (!same) { bad++; console.log('✗ 標題換到第二行', lang, w + 'x' + h, scr); }
+      }
       await p.evaluate(() => window.BumperApp.show('home'));
     }
     await ctx.close();
