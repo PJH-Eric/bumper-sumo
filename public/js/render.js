@@ -37,8 +37,16 @@
   /** viewR：鏡頭要框住的半徑（擂台縮小時鏡頭跟著拉近） */
   Renderer.prototype.layout = function (viewR) {
     var pad = 1.75;   // 幽靈外圈＋厚度
-    var u = Math.min(this.w / (2 * (viewR + pad)), this.h / (2 * (viewR + pad) + 0.6));
-    return { u: u, cx: this.w / 2, cy: this.h / 2 - u * 0.25 };
+    /* insets：上方狀態列與下方觸控鍵佔掉的高度（直向手機時由 app 提供），擂台放在中間那塊空間，不被手指擋住 */
+    var it = this.insets || { top: 0, bottom: 0 };
+    var top = it.top, avail = this.h - it.top - it.bottom;
+    if (avail < this.h * 0.45) { top = 0; avail = this.h; }   // 空間太小就退回全畫面
+    var u = Math.min(this.w / (2 * (viewR + pad)), avail / (2 * (viewR + pad) + 0.6));
+    return { u: u, cx: this.w / 2, cy: top + avail / 2 - u * 0.25 };
+  };
+  /** 設定上下保留區（CSS px）；直向時讓擂台避開 HUD 與觸控鍵 */
+  Renderer.prototype.setInsets = function (top, bottom) {
+    this.insets = { top: Math.max(0, top || 0), bottom: Math.max(0, bottom || 0) };
   };
 
   /* ---------- 粒子 ---------- */

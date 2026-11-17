@@ -376,6 +376,7 @@
     S.last = now;
     if (S.mode === 'online') onlineFrame(now, dt);
     else localFrame(now, dt);
+    if (now - (S.insetAt || 0) > 400) { S.insetAt = now; updateInsets(); }
     renderer.draw(S.match, {
       now: now, myId: S.myId, nameOf: nameOf, teamColors: TEAM_COLORS,
       ghostActive: R.ghostActive(S.match), showItems: S.mode !== 'online' || S.online.role === 'spectator'
@@ -383,6 +384,21 @@
     hud(now);
   }
   w.requestAnimationFrame(function (n) { S.last = n; frame(n); });
+
+  /* 直向畫面（手機／平板直拿）：擂台放在上方狀態列與下方觸控鍵之間，不被手指與 HUD 蓋住；橫向維持置中最大 */
+  function updateInsets() {
+    var cv = $('game-cv'); if (!cv || !renderer) return;
+    var cr = cv.getBoundingClientRect();
+    if (cr.height < cr.width * 1.1) { renderer.setInsets(0, 0); return; }
+    var top = 0, bottom = 0, hb = doc.querySelector('#s-game .hud-top');
+    if (hb) top = hb.getBoundingClientRect().bottom - cr.top + 4;
+    if (doc.body.classList.contains('touch-on')) {
+      var lowest = cr.bottom;
+      ['.tbtns', '.joy-base'].forEach(function (sel) { var e = doc.querySelector('#s-game ' + sel); if (e) { var r = e.getBoundingClientRect(); if (r.height) lowest = Math.min(lowest, r.top); } });
+      bottom = cr.bottom - lowest + 6;
+    }
+    renderer.setInsets(top, bottom);
+  }
 
   function localFrame(now, dt) {
     if (S.paused) { S.last = now; return; }

@@ -548,6 +548,6 @@ body.reduce * { animation-duration: .01ms !important; transition-duration: .01ms
 /* 按鈕命中區比外觀大一圈，手指偏一點也按得到 */
 .tbtn::before { content: ""; position: absolute; inset: -12px; border-radius: 50%; }
 .touch-hint { position: absolute; z-index: 9; inset: auto 0 calc(170px * var(--tb-size) + var(--safe-b)) 0; display: flex; justify-content: space-between; padding: 0 calc(24px + var(--safe-r)) 0 calc(24px + var(--safe-l)); pointer-events: none; animation: hintIn .4s ease-out; }
-.touch-hint span { max-width: 44%; padding: 8px 14px; border-radius: 14px; background: rgba(20,14,50,.82); font-weight: 800; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+.touch-hint span { max-width: 46%; padding: 8px 14px; border-radius: 14px; background: rgba(20,14,50,.82); font-weight: 800; box-shadow: 0 4px 0 rgba(0,0,0,.3); word-break: keep-all; text-wrap: balance; line-height: 1.35; }   /* 中文只在標點處換行（不會出現「開／車」斷字） */
 @keyframes hintIn { from { opacity: 0; transform: translateY(10px); } }
 body:not(.touch-on) .touch-hint { display: none; }
