@@ -108,7 +108,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .big-btn b { display: block; font-size: 1.25em; line-height: 1.1; }
 .big-btn small { display: block; font-weight: 600; opacity: .85; font-size: .78em; margin-top: 2px; }
 .big-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,.4) !important; }
-.big-btn:disabled { opacity: .5; cursor: default; }
+.big-btn:disabled { opacity: .6; cursor: not-allowed; filter: grayscale(1) brightness(.8); box-shadow: 0 3px 0 rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.25) !important; }   /* 不能按的大按鈕：灰階，一眼看出還不能開始 */
 .bb-ico { width: 52px; height: 52px; flex: none; border-radius: 16px; background: rgba(255,255,255,.22); display: grid; place-items: center; }
 .bb-ico svg { width: 32px; height: 32px; }
 .go-btn { justify-content: center; text-align: center; min-width: 200px; }

@@ -172,6 +172,20 @@
     ctx.restore();
   };
 
+  Renderer.prototype.drawThreat = function (ctx, c, x, y, u) {
+    var au = Math.max(u, 34), start = u * 0.7, len = au * 0.6, half = au * 0.32;
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(c.angle);
+    ctx.strokeStyle = 'rgba(255,60,60,0.7)'; ctx.lineWidth = Math.max(3, au * 0.09); ctx.lineCap = 'round';
+    ctx.setLineDash([au * 0.14, au * 0.12]);
+    ctx.beginPath(); ctx.moveTo(start + len, 0); ctx.lineTo(Math.max(start + len + u * 0.5, u * 3.3), 0); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ff3b3b'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(2, au * 0.055); ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(start, -half); ctx.lineTo(start + len, 0); ctx.lineTo(start, half); ctx.lineTo(start + len * 0.22, 0); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  };
+
   Renderer.prototype.drawMePin = function (ctx, x, y, u, t) {
     var au = Math.max(u, 38);
     var bob = this.opts.reduce ? 0 : Math.abs(Math.sin(t * 4)) * au * 0.12;
@@ -263,6 +277,8 @@
     }
     /* 自己的車：車頭方向箭頭（衝刺會往這個方向衝）。準備好＝亮黃＋衝刺路徑虛線；冷卻中＝小灰；蓄力中＝拉長橘色 */
     if (mine && c.wobble <= 0 && c.dash.phase !== 'burst' && !c.fx.spring) this.drawHeading(ctx, c, x, y, u, t);
+    /* 別人在蓄力（0.15 秒）：車頭前亮紅色警告箭頭，看得出他要往哪衝、來得及閃 */
+    if (!mine && !c.dummy && c.dash.phase === 'charge') this.drawThreat(ctx, c, x, y, u);
     Art.drawCar(ctx, x + ox, y + oy, ang, u, c.skin, {
       t: t, mood: c.mood, flash: c.fx.flash > 0.05, wobble: c.wobble > 0, shield: c.fx.shield > 0, iron: c.fx.iron > 0,
       lift: lift, scale: sc, colorBlind: this.opts.colorBlind

@@ -78,7 +78,7 @@
     'settings.reset': '恢復預設', 'settings.resetDone': '已恢復預設設定',
 
     'how.move.t': '移動：有慣性會滑', 'how.move.d': '用方向鍵／WASD 或左下搖桿開車。車子有慣性，放開會慢慢滑停，車頭會跟著移動方向轉。',
-    'how.dash.t': '衝刺：把人撞飛', 'how.dash.d': '按衝刺（空白鍵或右下大按鈕），車子先往後縮 0.15 秒蓄力，再往車頭方向衝出去。衝刺中撞到人力道最大；兩台同時衝刺對撞會互相抵銷。衝刺冷卻 2 秒。你的車頭前有箭頭指出衝刺方向：黃色加虛線＝可以衝（虛線約是衝得到的距離）、灰色＝冷卻中、橘色＝正在蓄力。',
+    'how.dash.t': '衝刺：把人撞飛', 'how.dash.d': '按衝刺（空白鍵或右下大按鈕），車子先往後縮 0.15 秒蓄力，再往車頭方向衝出去。衝刺中撞到人力道最大；兩台同時衝刺對撞會互相抵銷。衝刺冷卻 2 秒。你的車頭前有箭頭指出衝刺方向：黃色加虛線＝可以衝（虛線約是衝得到的距離）、灰色＝冷卻中、橘色＝正在蓄力。別的車蓄力時車頭會亮紅色箭頭，看到就快閃開！',
     'how.shrink.t': '擂台越縮越小', 'how.shrink.d': '開局 10 秒後擂台開始慢慢縮小，邊緣會閃紅線；80 秒時縮到最小，最後 10 秒在小圓裡決戰。一局 90 秒。',
     'how.wobble.t': '搖搖欲墜：快往內按！', 'how.wobble.d': '車子碰到邊緣不會馬上掉下去，會在邊上晃，頭上出現倒數圈。趕快往擂台中間按就能救回來；這時再被撞一下就直接掉落。搶救時間依難度不同（幼幼最長）。',
     'how.ghost.t': '出局變幽靈', 'how.ghost.d': '掉下去的人會變成幽靈在場外繞圈，每 10 秒可以往場上丟一個道具箱，誰撿到誰用。只剩 2 台時幽靈停手。最後留在場上的贏；時間到就比撞飛數，再比誰離中心近。',
@@ -221,7 +221,7 @@
     'settings.reset': 'Restore defaults', 'settings.resetDone': 'Defaults restored',
 
     'how.move.t': 'Driving: it slides!', 'how.move.d': 'Use arrow keys/WASD or the joystick at the bottom left. Cars have momentum and glide to a stop when you let go; the nose follows your direction.',
-    'how.dash.t': 'Dash: send them flying', 'how.dash.d': 'Press Dash (Space or the big button). Your car winds up for 0.15 s, then bursts forward. Hitting someone while dashing is the strongest bump; two dashes head-on cancel out. Dash cooldown is 2 s. The arrow in front of your car shows where you’ll dash: yellow with a dotted line = ready (the line is roughly how far you’ll go), gray = cooling down, orange = winding up.',
+    'how.dash.t': 'Dash: send them flying', 'how.dash.d': 'Press Dash (Space or the big button). Your car winds up for 0.15 s, then bursts forward. Hitting someone while dashing is the strongest bump; two dashes head-on cancel out. Dash cooldown is 2 s. The arrow in front of your car shows where you’ll dash: yellow with a dotted line = ready (the line is roughly how far you’ll go), gray = cooling down, orange = winding up. When another car winds up, a red arrow flashes in front of it—get out of the way!',
     'how.shrink.t': 'The arena shrinks', 'how.shrink.d': 'After 10 s the arena slowly shrinks and its edge flashes red. At 80 s it stops at its smallest — the last 10 s is a tiny-ring showdown. A match lasts 90 s.',
     'how.wobble.t': 'Teetering: steer inward!', 'how.wobble.d': 'Touching the edge doesn’t drop you right away — you teeter with a timer ring overhead. Steer toward the center to save yourself; get bumped now and you fall. Rescue time depends on difficulty (Toddler is longest).',
     'how.ghost.t': 'Out? Become a ghost', 'how.ghost.d': 'Fallen cars become ghosts circling outside. Every 10 s a ghost can drop an item box onto the arena — anyone can grab it. Ghosts stop when 2 cars remain. Last car standing wins; on time-out, most knockouts wins, then closest to center.',
