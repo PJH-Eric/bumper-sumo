@@ -58,6 +58,7 @@
     }
   };
   Renderer.prototype.popText = function (x, y, text, color, big) {
+    if (this.opts.texts === false) return;   // 首頁背景示範：不跳字，避免跟標題、選單文字疊在一起
     this.texts.push({ x: x, y: y, text: text, color: color || '#fff', life: big ? 1.2 : 0.8, max: big ? 1.2 : 0.8, big: !!big });
   };
 

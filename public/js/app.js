@@ -55,6 +55,7 @@
     doc.documentElement.style.setProperty('--tb-alpha', s.touchAlpha);
     doc.body.classList.toggle('reduce', !!s.reduceMotion);
     [renderer, hero].forEach(function (r) { if (r) { r.opts.colorBlind = s.colorBlind; r.opts.reduce = s.reduceMotion; r.opts.shake = s.shake && !s.reduceMotion; r.opts.names = s.names; } });
+    if (hero) { hero.opts.names = false; hero.opts.shake = false; hero.opts.texts = false; }   // 首頁背景只當裝飾：不顯示名牌、不震動、不跳字
   }
   function saveSettings() { Store.saveSettings(S.settings); applySettings(); }
   var setUI = {};
@@ -135,7 +136,7 @@
   }
   function startHero() {
     if (!hero) { hero = new w.BumperRenderer($('hero-cv')); hero.opts.names = false; applySettings(); }
-    hero.opts.names = false;
+    hero.opts.names = false; hero.opts.texts = false; hero.opts.shake = false;
     var defs = [0, 1, 2, 3, 4, 5].map(function (i) { return { id: 'h' + i, skin: i, level: 'normal' }; });
     heroMatch = R.createMatch({ seed: 'hero' + Date.now(), cars: defs, mode: 'practice', arenaR: 9 });
     heroMatch.cars.forEach(function (c, i) { var a = i / 6 * Math.PI * 2; c.x = Math.cos(a) * 4; c.y = Math.sin(a) * 4; c.dummy = false; });
