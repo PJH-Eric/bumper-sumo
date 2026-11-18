@@ -178,11 +178,17 @@
     caret.innerHTML = '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
     if (o.icon) { var ic = el('span', 'dd-icon', { 'aria-hidden': 'true' }); ic.innerHTML = o.icon; btn.appendChild(ic); }
     btn.appendChild(lab); btn.appendChild(caret);
-    var list = el('ul', 'dd-list', { role: 'listbox', tabindex: '-1' });
+    /* pop＝浮出的外框（定位、背景、自訂捲軸）；list＝裡面的選項清單（listbox、鍵盤焦點） */
+    var pop = el('div', 'dd-list');
+    var list = el('ul', 'dd-ul', { role: 'listbox', tabindex: '-1' });
     var lid = 'dd' + Math.random().toString(36).slice(2, 8);
     list.id = lid; btn.setAttribute('aria-controls', lid);
+    pop.appendChild(list);
+    pop._owner = node;
     node.appendChild(btn);
-    (o.portal ? doc.body : node).appendChild(list);
+    sweepDD();
+    (o.portal ? doc.body : node).appendChild(pop);
+    var sa = ScrollArea(pop);
     var value = o.value, active = 0;
 
     function opts() { return typeof o.options === 'function' ? o.options() : o.options; }
@@ -209,47 +215,56 @@
       active = (i + items.length) % items.length;
       Array.prototype.forEach.call(items, function (li, k) { li.classList.toggle('active', k === active); });
       list.setAttribute('aria-activedescendant', items[active].id);
-      items[active].scrollIntoView({ block: 'nearest' });
+      /* 只捲選單自己的捲動區，不要連帶捲動頁面 */
+      var v = sa.view, li = items[active];
+      if (li.offsetTop < v.scrollTop) v.scrollTop = li.offsetTop - 6;
+      else if (li.offsetTop + li.offsetHeight > v.scrollTop + v.clientHeight) v.scrollTop = li.offsetTop + li.offsetHeight - v.clientHeight + 6;
     }
     function place() {
       var r = btn.getBoundingClientRect();
       var vh = root.innerHeight, vw = root.innerWidth;
-      list.style.minWidth = Math.max(r.width, 140) + 'px';
+      pop.style.minWidth = Math.max(r.width, 140) + 'px';
       var below = vh - r.bottom, above = r.top;
-      var maxH = Math.max(120, Math.min(320, Math.max(below, above) - 16));
-      list.style.maxHeight = maxH + 'px';
+      /* 依選單實際需要的高度決定往上或往下：下面放得下就往下，否則上面放得下就往上，都放不下就往空間大的那邊 */
+      var need = Math.min(320, list.scrollHeight + 12) + 16;
+      var up = below >= need ? false : above >= need ? true : above > below;
+      var maxH = Math.max(120, Math.min(320, (up ? above : below) - 16));
+      pop.style.maxHeight = maxH + 'px';
       if (o.portal) {
-        list.style.position = 'fixed';
+        pop.style.position = 'fixed';
         var lw = Math.max(r.width, 140);
         var left = Math.min(Math.max(8, o.alignRight ? r.right - lw : r.left), vw - lw - 8);
-        list.style.left = left + 'px';
-        if (below < 180 && above > below) { list.style.top = ''; list.style.bottom = (vh - r.top + 6) + 'px'; }
-        else { list.style.bottom = ''; list.style.top = (r.bottom + 6) + 'px'; }
+        pop.style.left = left + 'px';
+        if (up) { pop.style.top = ''; pop.style.bottom = (vh - r.top + 6) + 'px'; }
+        else { pop.style.bottom = ''; pop.style.top = (r.bottom + 6) + 'px'; }
       } else {
-        list.classList.toggle('up', below < 180 && above > below);
+        pop.classList.toggle('up', up);
       }
     }
     function open() {
       if (openDD && openDD !== api) openDD.close();
-      render(); place();
-      list.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); node.classList.add('is-open');
+      sweepDD();
+      render();
+      pop.classList.add('open'); place();   // 先顯示才量得到選單高度
+      btn.setAttribute('aria-expanded', 'true'); node.classList.add('is-open');
+      sa.view.scrollTop = 0; sa.update();
       var arr = opts(); var idx = 0;
       arr.forEach(function (x, i) { if (x.value === value) idx = i; });
-      setActive(idx);
-      list.focus();
+      setActive(idx);   // 目前選的那一項會捲到看得見
+      list.focus({ preventScroll: true });
       openDD = api;
     }
     function close(focusBtn) {
-      list.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); node.classList.remove('is-open');
+      pop.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); node.classList.remove('is-open');
       if (openDD === api) openDD = null;
-      if (focusBtn) btn.focus();
+      if (focusBtn && btn.isConnected) btn.focus({ preventScroll: true });
     }
     function choose(v) {
       if (v === value) return;
       value = v; render();
       if (o.onChange) o.onChange(v);
     }
-    btn.addEventListener('click', function (e) { e.stopPropagation(); if (list.classList.contains('open')) close(); else open(); });
+    btn.addEventListener('click', function (e) { e.stopPropagation(); if (pop.classList.contains('open')) close(); else open(); });
     btn.addEventListener('keydown', function (e) { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(); } });
     list.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
@@ -262,8 +277,9 @@
     render();
     var api = {
       get: function () { return value; },
-      set: function (v) { value = v; render(); },
-      refresh: render, close: close, open: open, node: node, list: list,
+      set: function (v) { value = v; render(); if (pop.classList.contains('open')) setActive(active); },   // 開著時更新選項，鍵盤位置不跑掉
+      refresh: function () { render(); if (pop.classList.contains('open')) setActive(active); },
+      close: close, open: open, node: node, list: pop, ul: list,
       setDisabled: function (d) { btn.disabled = !!d; }
     };
     node._dd = api;
@@ -273,6 +289,16 @@
     if (openDD && !openDD.node.contains(e.target) && !openDD.list.contains(e.target)) openDD.close();
   });
   root.addEventListener('resize', function () { if (openDD) openDD.close(); });
+  /* 頁面（選單以外）捲動時關掉選單：浮在 body 上的選單不會跟著按鈕移動，避免跟按鈕分家 */
+  doc.addEventListener('scroll', function (e) {
+    if (openDD && !(e.target && e.target.nodeType === 1 && openDD.list.contains(e.target))) openDD.close();
+  }, true);
+  /* 清掉按鈕已經被移除（畫面重建）的下拉選單殘留；開著的也一併關掉 */
+  function sweepDD() {
+    if (openDD && !openDD.node.isConnected) { openDD.list.classList.remove('open'); openDD = null; }
+    var pops = doc.querySelectorAll('body > .dd-list');
+    for (var i = 0; i < pops.length; i++) { if (!pops[i]._owner || !pops[i]._owner.isConnected) pops[i].remove(); }
+  }
 
   /* ---------- 捲動區（自訂捲軸） ----------
    * <div data-scroll> 內容 </div>  → 包成 .sa > .sa-view(內容) + .sa-track>.sa-thumb */
@@ -332,14 +358,32 @@
     if (hthumb) drag(hthumb, true);
     track.addEventListener('pointerdown', function (e) {
       if (e.target !== track) return;
+      if (e.pointerType !== 'mouse') {   // 手指／觸控筆在捲軸上滑：跟著手指捲（不要一按就跳一整頁）
+        var sy = e.clientY, st = view.scrollTop, id = e.pointerId;
+        track.setPointerCapture(id); e.preventDefault();
+        var mv = function (ev) { if (ev.pointerId === id) view.scrollTop = st - (ev.clientY - sy); };
+        var up = function (ev) { if (ev.pointerId !== id) return; track.removeEventListener('pointermove', mv); track.removeEventListener('pointerup', up); track.removeEventListener('pointercancel', up); };
+        track.addEventListener('pointermove', mv); track.addEventListener('pointerup', up); track.addEventListener('pointercancel', up);
+        return;
+      }
       var r = thumb.getBoundingClientRect();
       view.scrollBy({ top: (e.clientY < r.top ? -1 : 1) * view.clientHeight * 0.9, behavior: 'smooth' });
     });
+    /* 滑鼠滾輪停在捲軸上也要能捲（捲軸疊在內容右緣，原本會吃掉滾輪） */
+    var wheel = function (e) {
+      if (e.ctrlKey) return;
+      var dx = e.deltaX, dy = e.deltaY, k = e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? view.clientHeight : 1;
+      var before = view.scrollTop, beforeX = view.scrollLeft;
+      view.scrollTop += dy * k; view.scrollLeft += dx * k;
+      if (view.scrollTop !== before || view.scrollLeft !== beforeX) e.preventDefault();
+    };
+    track.addEventListener('wheel', wheel, { passive: false });
+    if (htrack) htrack.addEventListener('wheel', wheel, { passive: false });
     view.addEventListener('scroll', update, { passive: true });
     if (root.ResizeObserver) { var ro = new ResizeObserver(update); ro.observe(view); ro.observe(node); }
     if (root.MutationObserver) new MutationObserver(function () { requestAnimationFrame(update); }).observe(view, { childList: true, subtree: true, characterData: true });
     /* 焦點進來時自動捲到看得到 */
-    view.addEventListener('focusin', function (e) { if (e.target !== view && e.target.scrollIntoView) e.target.scrollIntoView({ block: 'nearest' }); });
+    view.addEventListener('focusin', function (e) { if (e.target !== view && e.target.scrollIntoView && !e.target.classList.contains('dd-ul')) e.target.scrollIntoView({ block: 'nearest' }); });
     var api = { view: view, update: update, node: node, toBottom: function () { view.scrollTop = view.scrollHeight; update(); } };
     node._sa = api;
     areas.push(api);

@@ -71,13 +71,15 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .dd.is-open .dd-caret { transform: rotate(180deg); }
 .dd-swatch { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 2px rgba(255,255,255,.4); }
 .dd-list {
-  position: absolute; z-index: 80; top: calc(100% + 6px); left: 0; margin: 0; padding: 6px; list-style: none;
+  position: absolute; z-index: 80; top: calc(100% + 6px); left: 0; margin: 0; padding: 6px 4px 6px 6px;
   background: #241b58; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.14);
-  overflow-y: auto; scrollbar-width: none; display: none; outline: none;
+  display: none; outline: none;
 }
-.dd-list::-webkit-scrollbar { display: none; }
 .dd-list.up { top: auto; bottom: calc(100% + 6px); }
-.dd-list.open { display: block; }
+.dd-list.open { display: flex; }   /* 外框是自訂捲動區（.sa），選項太多時右側有自繪捲軸 */
+.dd-list.sa:not(.open) { display: none; }   /* .sa 的 display:flex 不能讓關著的選單露出來 */
+.dd-list.sa-over .dd-ul { padding-right: 12px; }
+.dd-ul { margin: 0; padding: 0; list-style: none; outline: none; }
 .dd-opt { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; white-space: nowrap; }
 .dd-opt.active { background: rgba(255,255,255,.12); }
 .dd-opt[aria-selected="true"] { color: var(--yellow); }
