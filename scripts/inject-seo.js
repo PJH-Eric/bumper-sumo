@@ -8,7 +8,7 @@ const esc = value => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;'
 const safeJson = value => JSON.stringify(value).replace(/</g, '\\u003c');
 
 function validate(cfg, gaId) {
-  for (const key of ['id', 'siteUrl', 'title', 'description', 'lobbyUrl', 'genre', 'players']) {
+  for (const key of ['id', 'siteUrl', 'title', 'description', 'lobbyUrl', 'lobbyName', 'genre', 'players']) {
     if (typeof cfg[key] !== 'string' || !cfg[key].trim()) throw new Error('seo.config.json 缺少欄位：' + key);
   }
   if (!/^[a-z0-9-]+$/.test(cfg.id) || cfg.siteUrl !== 'https://pjh-eric.github.io/' + cfg.id + '/') {
@@ -39,10 +39,10 @@ function inject(root, env = process.env) {
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'WebApplication',
     name: cfg.title.split('｜')[0], url: cfg.siteUrl, description: cfg.description,
-    applicationCategory: 'GameApplication', operatingSystem: 'Any', inLanguage: 'zh-Hant',
+    applicationCategory: 'GameApplication', operatingSystem: 'Any', inLanguage: ['zh-Hant', 'zh-Hans', 'en'],
     genre: cfg.genre, offers: { '@type': 'Offer', price: '0', priceCurrency: 'TWD' },
     image: cfg.ogImage || undefined, thumbnailUrl: cfg.ogImage || undefined,
-    isPartOf: { '@type': 'WebSite', url: cfg.lobbyUrl }
+    isPartOf: { '@type': 'WebSite', name: cfg.lobbyName, url: cfg.lobbyUrl }
   };
   const head = [
     MARK,
@@ -56,6 +56,7 @@ function inject(root, env = process.env) {
     '<meta name="robots" content="index, follow, max-image-preview:large">',
     '<meta property="og:type" content="website">',
     '<meta property="og:locale" content="zh_TW">',
+    '<meta property="og:site_name" content="' + esc(cfg.lobbyName) + '">',
     '<meta property="og:title" content="' + esc(cfg.title) + '">',
     '<meta property="og:description" content="' + esc(cfg.description) + '">',
     '<meta property="og:url" content="' + esc(cfg.siteUrl) + '">',

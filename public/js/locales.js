@@ -4,8 +4,8 @@
   var I = root.I18N;
 
   I.register('zh-Hant', {
-    'meta.title': '碰碰車大亂鬥｜免費線上多人碰碰車對戰',
-    'meta.desc': '免費免下載的碰碰車大亂鬥！2～6 台可愛動物碰碰車擠在越縮越小的擂台上，衝刺把對手撞出場外。單機五段電腦、自由練習，也能線上多人對戰、觀戰聊天，手機平板觸控都好玩。',
+    'meta.title': '碰碰車大亂鬥｜免費 2～6 人線上擂台對戰',
+    'meta.desc': '駕駛動物碰碰車，在越縮越小的圓形擂台上衝刺，把對手撞出場外！免下載，支援手機、平板和鍵盤。可自由練習、挑戰五段電腦，或與好友線上混戰、組隊、觀戰。',
     'game.name': '碰碰車大亂鬥',
     'lang.label': '語言',
     'common.back': '返回', 'common.cancel': '取消', 'common.close': '關閉', 'common.done': '完成', 'common.ok': '確定', 'common.you': '你',
@@ -148,7 +148,7 @@
 
   I.register('en', {
     'meta.title': 'Bumper Brawl | Free Online Multiplayer Bumper Cars',
-    'meta.desc': 'Free bumper car brawl, no download! 2–6 cute animal bumper cars on a shrinking arena — dash to knock rivals off. Five AI levels, free practice, online multiplayer with spectating and chat. Great on phones and tablets.',
+    'meta.desc': 'Dash around a shrinking arena and knock rival bumper cars off the edge. Practice, face five AI levels, or play with 2–6 online players. No download required.',
     'game.name': 'Bumper Brawl',
     'lang.label': 'Language',
     'common.back': 'Back', 'common.cancel': 'Cancel', 'common.close': 'Close', 'common.done': 'Done', 'common.ok': 'OK', 'common.you': 'You',

@@ -37,9 +37,12 @@ try {
   assert.equal((built.match(/rel="canonical"/g) || []).length, 1);
   assert.ok(built.includes('href="' + cfg.siteUrl + '"'));
   assert.ok(built.includes('property="og:title"'));
+  assert.ok(built.includes('property="og:site_name" content="' + cfg.lobbyName + '"'));
   assert.ok(built.includes('name="twitter:card"'));
   const ld = JSON.parse(built.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
   assert.equal(ld.url, cfg.siteUrl);
+  assert.deepEqual(ld.inLanguage, ['zh-Hant', 'zh-Hans', 'en']);
+  assert.equal(ld.isPartOf.url, cfg.lobbyUrl);
   if (cfg.ogImage) {
     assert.equal(ld.image, cfg.ogImage);
     assert.equal(ld.thumbnailUrl, cfg.ogImage);
@@ -47,6 +50,7 @@ try {
     assert.ok(built.includes('property="og:image:type" content="image/webp"'));
     assert.ok(built.includes('property="og:image:width" content="1200"'));
     assert.ok(built.includes('property="og:image:height" content="675"'));
+    assert.ok(built.includes('property="og:image:alt" content="' + cfg.ogImageAlt + '"'));
     assert.ok(built.includes('name="twitter:image" content="' + cfg.ogImage + '"'));
   }
   const sitemap = fs.readFileSync(path.join(temp, 'public/sitemap.xml'), 'utf8');

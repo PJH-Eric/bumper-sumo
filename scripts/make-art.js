@@ -18,43 +18,45 @@ function paint(args) {
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
   const th = Art.resolveTheme(0, 'promo');
-  function scene(cx, cy, u, opts) {
+  function scene(cx, cy, u, carScale) {
     Art.drawBelow(ctx, th, W, H, cx, cy, u, 1.2, true);
     Art.drawDecor(ctx, th, cx, cy, u, 7.5, 1.2, true);
     Art.drawArena(ctx, th, cx, cy, u, 7.5, 7.5, 0.35, { reduce: true });
     /* 衝刺撞擊瞬間：小熊（藍）衝向小貓（紅），旁邊青蛙、小雞、兔兔 */
-    const S = u * (opts.carScale || 1.9);
+    const S = u * carScale;
     const hit = [cx + u * 0.9, cy - u * 0.3];
     ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = u * 0.16; ctx.lineCap = 'round';
     for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(cx - u * 3.4, cy + u * 1.1 + k * u * 0.5); ctx.lineTo(cx - u * 5.4, cy + u * 1.7 + k * u * 0.5); ctx.stroke(); }
     ctx.restore();
-    Art.drawCar(ctx, cx - u * 4.2, cy + u * 4.6, -0.9, S * 0.8, 2, { t: 0.4, mood: 'happy' });
-    Art.drawCar(ctx, cx + u * 4.6, cy + u * 3.6, -2.4, S * 0.8, 3, { t: 0.4, mood: 'shock' });
-    Art.drawCar(ctx, cx - u * 0.6, cy - u * 4.6, 1.2, S * 0.75, 4, { t: 0.4, mood: 'happy' });
-    Art.drawCar(ctx, cx - u * 1.9, cy + u * 0.6, -0.32, S, 0, { t: 0.4, mood: 'happy' });
-    Art.drawCar(ctx, cx + u * 2.4, cy - u * 1.2, Math.PI - 0.3, S, 1, { t: 0.4, mood: 'dizzy', flash: false });
+    Art.drawCar(ctx, cx - u * 4.3, cy + u * 4, -0.9, S * 0.55, 2, { t: 0.4, mood: 'happy' });
+    Art.drawCar(ctx, cx + u * 4.7, cy + u * 3.8, -2.4, S * 0.55, 3, { t: 0.4, mood: 'shock' });
+    Art.drawCar(ctx, cx - u * 0.9, cy - u * 4.5, 1.2, S * 0.55, 4, { t: 0.4, mood: 'happy' });
+    Art.drawCar(ctx, cx - u * 2.1, cy + u * 0.6, -0.32, S, 0, { t: 0.4, mood: 'happy' });
+    Art.drawCar(ctx, cx + u * 3.3, cy - u * 1.2, Math.PI - 0.3, S, 1, { t: 0.4, mood: 'dizzy' });
     const stars = [[0, 0, 0.9, '#fff36b'], [0.9, -1.1, 0.55, '#ffffff'], [-0.6, -1.3, 0.45, '#ffb13b'], [1.2, 0.7, 0.5, '#ffb13b'], [-0.9, 0.9, 0.4, '#ffffff']];
     stars.forEach((s) => Art.star(ctx, hit[0] + s[0] * u, hit[1] + s[1] * u, u * s[2], s[3]));
   }
   if (kind === 'seo') {
-    scene(W * 0.29, H * 0.56, H / 12.5, { carScale: 2.4 });
-    /* 右側標題 */
-    const g = ctx.createLinearGradient(W * 0.56, 0, W, 0);
-    g.addColorStop(0, 'rgba(29,22,64,0)'); g.addColorStop(0.18, 'rgba(29,22,64,0.82)'); g.addColorStop(1, 'rgba(29,22,64,0.92)');
-    ctx.fillStyle = g; ctx.fillRect(W * 0.56, 0, W * 0.44, H);
+    scene(W * 0.30, H * 0.52, H / 15, 3.4);
+    const g = ctx.createLinearGradient(W * 0.46, 0, W * 0.72, 0);
+    g.addColorStop(0, 'rgba(29,22,64,0)');
+    g.addColorStop(1, 'rgba(29,22,64,0.94)');
+    ctx.fillStyle = g;
+    ctx.fillRect(W * 0.46, 0, W * 0.54, H);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const F = '"Baloo 2", "Noto Sans TC", "Microsoft JhengHei", sans-serif';
-    ctx.font = '900 112px ' + F;
+    ctx.font = '900 106px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
     ctx.lineJoin = 'round';
     ['碰碰車', '大亂鬥'].forEach((line, i) => {
-      const y = H * 0.33 + i * 132;
-      ctx.lineWidth = 16; ctx.strokeStyle = '#b8236f'; ctx.strokeText(line, W * 0.79, y + 6);
-      ctx.shadowColor = '#ff4fa3'; ctx.shadowBlur = 28; ctx.fillStyle = '#ffffff'; ctx.fillText(line, W * 0.79, y); ctx.shadowBlur = 0;
+      const x = W * 0.76;
+      const y = H * 0.40 + i * 126;
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = '#b8236f';
+      ctx.strokeText(line, x, y + 6);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(line, x, y);
     });
-    ctx.font = '800 38px ' + F; ctx.fillStyle = '#ffd23f';
-    ctx.fillText('免費線上多人碰碰車對戰', W * 0.79, H * 0.73);
   } else if (kind === 'cover') {
-    scene(W * 0.5, H * 0.56, H / 12.5, { carScale: 2.4 });
+    scene(W * 0.5, H * 0.52, H / 14, 3.8);
   } else {
     /* 圖示：只留一台碰碰車＋撞擊星星 */
     const r = W * 0.22;
@@ -65,7 +67,9 @@ function paint(args) {
     Art.drawCar(ctx, W * 0.47, H * 0.6, -0.55, W * 0.56, 0, { t: 0.4, mood: 'happy' });
     Art.star(ctx, W * 0.8, H * 0.24, W * 0.13, '#ffe36b');
   }
-  return cv.toDataURL(kind === 'seo' || kind === 'cover' ? 'image/webp' : 'image/png', 0.92);
+  if (kind === 'seo') return cv.toDataURL('image/webp', 0.88);
+  if (kind === 'cover') return cv.toDataURL('image/webp', 0.84);
+  return cv.toDataURL('image/png');
 }
 
 function icoFrom(pngs) {
