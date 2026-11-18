@@ -577,7 +577,13 @@
     else if (me && !me.alive) status = t('sum.ghost');
     else if (me && me.wobble > 0) status = t('sum.wobble');
     else status = S.mode === 'practice' ? t('sum.practice') : t('sum.play');
+    var meCar = null; m.cars.forEach(function (c) { if (c.id === S.myId) meCar = c; });
+    var myTeam = m.opts.teams && meCar ? meCar.team : -1;
     var cars = m.cars.filter(function (c) { return !c.dummy; }).slice().sort(function (a, b) {
+      if (m.opts.teams && a.team !== b.team) {   // 組隊：同隊排在一起，自己這隊排第一
+        if (a.team === myTeam || b.team === myTeam) return a.team === myTeam ? -1 : 1;
+        return a.team - b.team;
+      }
       if (a.alive !== b.alive) return a.alive ? -1 : 1;
       if (b.stats.kos !== a.stats.kos) return b.stats.kos - a.stats.kos;
       return 0;
@@ -587,7 +593,14 @@
     lastSum = key;
     $('sum-status').textContent = status + (S.mode === 'practice' ? '' : ' ・ ' + t('sum.goal'));
     var ol = $('sum-rank'); ol.innerHTML = '';
+    var lastTeam = null;
     cars.forEach(function (c) {
+      if (m.opts.teams && c.team !== lastTeam) {   // 每隊前面一行隊名（隊伍色），標出哪隊是隊友、哪隊是對手
+        lastTeam = c.team;
+        var hd = UI.el('li', 'rank-team'); hd.style.color = TEAM_COLORS[c.team % 3];
+        hd.textContent = t('team.' + (c.team % 3)) + (myTeam < 0 ? '' : ' · ' + (c.team === myTeam ? t('solo.ally') : t('solo.rival')));
+        ol.appendChild(hd);
+      }
       var li = UI.el('li', (c.alive ? '' : 'out ') + (c.id === S.myId ? 'me' : ''));
       var dot = UI.el('span', 'dot'); dot.style.background = m.opts.teams ? TEAM_COLORS[c.team % 3] : Art.skinOf(c.skin).body; li.appendChild(dot);
       var n = UI.el('span', 'rn'); n.textContent = nameOf(c) + (c.alive ? '' : ' ' + t('sum.outTag')); li.appendChild(n);
