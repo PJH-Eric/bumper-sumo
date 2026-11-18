@@ -10,9 +10,9 @@
     "test:ai": "node tests/ai-ladder.js",
     "test:online": "node scripts/online-check.js",
     "test:browser": "node scripts/browser-check.js",
-    "test:rwd": "node scripts/rwd-check.js && node scripts/result-fit-check.js && node scripts/header-fit-check.js",
+    "test:rwd": "node scripts/rwd-check.js && node scripts/result-fit-check.js && node scripts/header-fit-check.js && node scripts/dropdown-check.js",
     "shots": "node scripts/shots.js",
-    "verify": "node tests/verify.js && node tests/localization.js && node tests/seo.js && node tests/ai-ladder.js && node scripts/online-check.js && node scripts/browser-check.js && node scripts/rwd-check.js && node scripts/result-fit-check.js && node scripts/header-fit-check.js",
+    "verify": "node tests/verify.js && node tests/localization.js && node tests/seo.js && node tests/ai-ladder.js && node scripts/online-check.js && node scripts/browser-check.js && node scripts/rwd-check.js && node scripts/result-fit-check.js && node scripts/header-fit-check.js && node scripts/dropdown-check.js",
     "inject": "node scripts/inject-server-url.js",
     "gen:hans": "node scripts/gen-hans.js"
   },

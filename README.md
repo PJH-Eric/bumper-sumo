@@ -27,7 +27,7 @@ npm start            # http://localhost:3250（Windows 也可以直接雙擊「�
 | `npm run test:ai` | 五段電腦同場混戰 200 局，勝率需「神話 > 困難 > 普通 > 簡單 > 幼幼」 |
 | `npm run test:online` | 開一台伺服器、多個客戶端實測線上流程（含 100／200ms 延遲） |
 | `npm run test:browser` | 無頭瀏覽器操作檢查（需本機 Chrome／Edge 與 `npm start`） |
-| `npm run test:rwd` | 全畫面×全裝置 RWD 驗收＋結算卡在矮橫向手機不被右上角按鈕蓋住、按鈕都在畫面內＋標題列／HUD 在三種語言下都不被右上角按鈕蓋住 |
+| `npm run test:rwd` | 全畫面×全裝置 RWD 驗收＋結算卡在矮橫向手機不被右上角按鈕蓋住、按鈕都在畫面內＋標題列／HUD 在三種語言下都不被右上角按鈕蓋住＋所有下拉選單在 6 種尺寸 × 繁中／英文、按鈕在上／中／下時都看得到、選得到 |
 | `npm run shots` | 各畫面 × 手機／平板直橫／桌機截圖到 `shots/`（不進 git） |
 | `npm run gen:hans` | 用 OpenCC（opencc-js，台灣繁體→簡體＋慣用詞）從繁中產生簡中 `public/js/locales-hans.js` |
 | `npm run inject` | 把 `GAME_SERVER_URL` 注入 `public/js/config.js`（前端另外部署時） |

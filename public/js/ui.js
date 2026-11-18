@@ -234,6 +234,8 @@
       pop.style.left = Math.min(Math.max(8, o.alignRight ? r.right - lw : r.left), vw - lw - 8) + 'px';
       if (dirUp) { pop.style.top = 'auto'; pop.style.bottom = (vh - r.top + 6) + 'px';   /* top 要明確設 auto：CSS 預設的 top 還在會把清單壓成 0 高 */ }
       else { pop.style.bottom = 'auto'; pop.style.top = (r.bottom + 6) + 'px'; }
+      /* 按鈕移動後，該方向剩下的空間也跟著變：重算最大高度，清單不會超出畫面（內容多就靠清單自己的捲軸） */
+      pop.style.maxHeight = Math.max(88, Math.min(320, (dirUp ? r.top : vh - r.bottom) - 16)) + 'px';
     }
     function place() {
       var r = btn.getBoundingClientRect();
@@ -272,6 +274,8 @@
       setActive(idx);   // 目前選的那一項會捲到看得見
       list.focus({ preventScroll: true });
       openDD = api;
+      /* 下一幀自訂捲軸才會判斷要不要顯示（顯示時清單右側多留 12px，變寬）：再對一次位置，不超出畫面右邊 */
+      root.requestAnimationFrame(function () { sa.update(); follow(); });
     }
     function close(focusBtn) {
       pop.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); node.classList.remove('is-open');
