@@ -679,9 +679,11 @@
     var dl = $('result-stats'); dl.innerHTML = '';
     if (mine && !spectator) {
       var st = mine.stats;
-      var items = st.items.length ? st.items.map(function (x) { return t('item.' + x); }).join('、') : t('result.none');
+      var items = st.items.length ? st.items.map(function (x) { return t('item.' + x); }).join(I18N.lang === 'en' ? ', ' : '、') : t('result.none');
       [['result.kos', st.kos], ['result.survive', t('result.sec', { n: Math.round(st.survive) })], ['result.dashes', st.dashes], ['result.hits', st.hits], ['result.rescues', st.rescues], ['result.items', items], ['result.ghostDrops', st.ghostDrops]].forEach(function (p) {
         var d = UI.el('div'); var dt = UI.el('dt'); dt.textContent = t(p[0]); var dd = UI.el('dd'); dd.textContent = String(p[1]); d.appendChild(dt); d.appendChild(dd); dl.appendChild(d);
+        if (typeof p[1] === 'string' && !/^[0-9]/.test(p[1])) d.classList.add('txt');   // 文字型（道具名稱）：字小一點
+        if (p[0] === 'result.items' && st.items.length > 1) d.classList.add('wide');   // 用了 2 種以上道具：佔兩格，不會擠成一字一行
       });
     }
     var online = S.mode === 'online';
@@ -1432,6 +1434,7 @@
       send: function (text, name) { Net.send('lobbychat:send', { text: text, name: name }); },
       joinRoom: function (code) { joinRoom(code, null, 'player'); }
     });
+    UI.Switch('#set-lobbychat');   // 先變成遊戲的自訂開關（有圓鈕、可點、會送 swchange），共用聊天室元件才接得到切換
     LobbyChatUI.bindSetting({ input: '#set-lobbychat', label: '#set-lobbychat-label', sub: '#set-lobbychat-sub', reset: '#b-settings-reset', event: 'swchange' });
     Net.on('lobbychat:history', function (p) { LobbyChatUI.history(p.history, p.online); });
     Net.on('lobbychat:msg', function (p) { LobbyChatUI.add(p.msg); });

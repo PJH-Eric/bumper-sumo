@@ -234,6 +234,12 @@ async function main() {
     ok(await D.evaluate(() => { const d = document.querySelector('#solo-theme')._dd, L = d.list.getBoundingClientRect(), B = d.node.querySelector('.dd-btn').getBoundingClientRect(); return d.list.classList.contains('open') && Math.min(Math.abs(L.top - B.bottom), Math.abs(B.top - L.bottom)) <= 10; }), '打開後頁面還在捲（慣性捲動）：下拉選單不會被關掉，而且跟著按鈕走');
     await D.evaluate(() => { const v = document.querySelector('#s-solo .sa-view'); v.scrollTop += 2000; }); await D.waitForTimeout(150);
     ok(!(await D.evaluate(() => document.querySelector('#solo-theme')._dd.list.classList.contains('open'))), '按鈕捲出畫面時下拉選單才關閉');
+    /* 所有開關都要是自訂開關（有圓鈕、role=switch）；大廳聊天室開關點了會切換並記住 */
+    ok(await D.evaluate(() => [...document.querySelectorAll('.sw')].every((e) => e.querySelector('.sw-knob') && e.getAttribute('role') === 'switch')), '所有開關都有圓鈕且是 switch（含設定裡的大廳聊天室）');
+    await D.evaluate(() => window.BumperApp.show('home')); await D.click('#btn-settings'); await D.waitForTimeout(200);
+    await D.evaluate(() => document.getElementById('set-lobbychat').scrollIntoView({ block: 'center' })); await D.click('#set-lobbychat'); await D.waitForTimeout(150);
+    ok(await D.evaluate(() => document.getElementById('set-lobbychat').getAttribute('aria-checked') === 'false' && localStorage.getItem('lobbyChat:bumper-sumo:enabled') === '0'), '大廳聊天室開關點了會關閉並記住');
+    await D.click('#set-lobbychat'); await D.keyboard.press('Escape'); await D.waitForTimeout(150);
     /* 紀錄頁選完時間範圍會整頁重畫：焦點要回到新的下拉按鈕 */
     await D.evaluate(() => window.BumperApp.show('home')); await D.evaluate(() => document.getElementById('btn-records').click()); await D.waitForTimeout(250);
     await D.focus('#s-records .dd-btn'); await D.keyboard.press('ArrowDown'); await D.waitForTimeout(120); await D.keyboard.press('ArrowDown'); await D.keyboard.press('Enter'); await D.waitForTimeout(150);
