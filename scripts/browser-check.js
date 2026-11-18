@@ -234,6 +234,10 @@ async function main() {
     ok(await D.evaluate(() => { const d = document.querySelector('#solo-theme')._dd, L = d.list.getBoundingClientRect(), B = d.node.querySelector('.dd-btn').getBoundingClientRect(); return d.list.classList.contains('open') && Math.min(Math.abs(L.top - B.bottom), Math.abs(B.top - L.bottom)) <= 10; }), '打開後頁面還在捲（慣性捲動）：下拉選單不會被關掉，而且跟著按鈕走');
     await D.evaluate(() => { const v = document.querySelector('#s-solo .sa-view'); v.scrollTop += 2000; }); await D.waitForTimeout(150);
     ok(!(await D.evaluate(() => document.querySelector('#solo-theme')._dd.list.classList.contains('open'))), '按鈕捲出畫面時下拉選單才關閉');
+    /* 紀錄頁選完時間範圍會整頁重畫：焦點要回到新的下拉按鈕 */
+    await D.evaluate(() => window.BumperApp.show('home')); await D.evaluate(() => document.getElementById('btn-records').click()); await D.waitForTimeout(250);
+    await D.focus('#s-records .dd-btn'); await D.keyboard.press('ArrowDown'); await D.waitForTimeout(120); await D.keyboard.press('ArrowDown'); await D.keyboard.press('Enter'); await D.waitForTimeout(150);
+    ok(await D.evaluate(() => { const a = document.activeElement; return a && a.classList.contains('dd-btn') && a.isConnected && !!a.closest('#s-records'); }), '紀錄頁選完、整頁重畫後焦點回到下拉按鈕');
     await D.evaluate(() => window.BumperApp.show('howto')); await D.waitForTimeout(250);
     const tp = await D.evaluate(() => { const v = document.querySelector('#s-howto .sa-view'); v.scrollTop = 0; const r = document.querySelector('#s-howto .sa-track').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + 80 }; });
     await D.mouse.move(tp.x, tp.y); await D.mouse.wheel(0, 200); await D.waitForTimeout(200);

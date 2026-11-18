@@ -737,7 +737,7 @@
     var row = UI.el('div', 'row'); var lab = UI.el('span', 'row-label'); lab.textContent = t('rec.bucket'); row.appendChild(lab);
     var ddBox = UI.el('div'); row.appendChild(ddBox); p1.appendChild(row);
     var buckets = [{ value: 'all', label: function () { return t('rec.all'); } }].concat(LEVELS.map(function (l) { return { value: 'solo:' + l, label: function () { return t('rec.solo', { lv: t('lv.' + l) }); } }; })).concat([{ value: 'online', label: function () { return t('rec.online'); } }]);
-    recDD = UI.Select(ddBox, { value: recBucket, portal: true, aria: function () { return t('rec.bucket'); }, options: buckets, onChange: function (v) { recBucket = v; renderRecords(); } });
+    recDD = UI.Select(ddBox, { value: recBucket, portal: true, aria: function () { return t('rec.bucket'); }, options: buckets, onChange: function (v) { recBucket = v; renderRecords(); var nb = recDD && recDD.node.querySelector('.dd-btn'); if (nb) nb.focus({ preventScroll: true }); } });   // 紀錄頁會整頁重畫：選完把焦點放回新的下拉按鈕
     var st = d.stats[recBucket] || { games: 0, wins: 0, kos: 0, rescues: 0, survive: 0 };
     var best = recBucket === 'all' ? Object.keys(d.best).reduce(function (a, k) { var b = d.best[k]; return { kos: Math.max(a.kos, b.kos), survive: Math.max(a.survive, b.survive), rescues: Math.max(a.rescues, b.rescues) }; }, { kos: 0, survive: 0, rescues: 0 }) : (d.best[recBucket] || { kos: 0, survive: 0, rescues: 0 });
     var dl = UI.el('dl', 'my-stats rec-stats');
@@ -1228,10 +1228,18 @@
     $('room-title').textContent = room.name;
     $('room-code').textContent = '#' + room.code;
     $('room-role').textContent = room.you.role === 'player' ? (host ? t('room.roleHost') : t('room.rolePlayer')) : t('room.roleSpectator');
-    var box = $('room-seats'); box.innerHTML = '';
+    var box = $('room-seats');
+    /* 席位每次房間更新都會重建：記住目前焦點在哪個席位的哪顆按鈕，重建後放回去（鍵盤操作不會被打回頁首） */
+    var fe = doc.activeElement, fSlot = null, fSel = null;
+    if (fe && box.contains(fe) && fe.closest('[data-slot]')) {
+      fSlot = fe.closest('[data-slot]').getAttribute('data-slot');
+      fSel = fe.classList.contains('dd-btn') ? '.dd-btn' : fe.classList.contains('ghost') ? '.btn.ghost' : 'button';
+    }
+    box.innerHTML = '';
     room.seats.forEach(function (s) {
       if (!s.open) return;
       var d = UI.el('div', 'seat' + (s.kind === 'empty' ? ' empty-seat' : '') + (me && s.sid === me.sid ? ' me' : '') + (s.kind === 'human' && s.ready ? ' ready' : ''));
+      d.setAttribute('data-slot', String(s.slot));
       if (s.kind !== 'empty') {
         if (s.kind === 'human' && s.sid === room.host) { var cr = UI.el('span', 'host-crown'); cr.textContent = t('room.host'); d.appendChild(cr); }
         var cv = UI.el('canvas'); d.appendChild(cv); drawCarPreview(cv, s.skin, s.ready ? 'happy' : 'happy', 72);
@@ -1267,6 +1275,10 @@
       }
       box.appendChild(d);
     });
+    if (fSlot !== null) {
+      var nf = box.querySelector('[data-slot="' + fSlot + '"] ' + fSel) || box.querySelector('[data-slot="' + fSlot + '"] button');
+      if (nf) nf.focus({ preventScroll: true });
+    }
     if (room.spectators.length) {
       var sp = UI.el('p', 'hint'); sp.textContent = t('room.spectatorList', { n: room.spectators.length, names: room.spectators.map(function (x) { return x.name; }).join('、') }); box.appendChild(sp);
     }
