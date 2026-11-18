@@ -27,8 +27,23 @@ async function main() {
   await page.click('#btn-solo'); await page.click('#s-solo .back-btn');
   await page.click('#btn-records'); await page.click('#s-records .back-btn');
   await page.click('#btn-howto'); await page.click('#s-howto .back-btn');
-  await page.click('#btn-practice'); await page.waitForTimeout(500); await page.click('#pr-exit');
+  await page.click('#btn-practice');
+  await page.focus('#pr-toggle'); await page.keyboard.press('Enter');
+  ok(await page.getAttribute('#pr-toggle', 'aria-expanded') === 'false', 'Enter 可收合已聚焦的練習工具');
+  await page.keyboard.press('Space');
+  ok(await page.getAttribute('#pr-toggle', 'aria-expanded') === 'true', '空白鍵可展開已聚焦的練習工具');
+  await page.click('#pr-exit');
   ok(net.length === 0, '首頁／單機／練習／紀錄／怎麼玩沒有任何後端請求：' + net.join(','));
+
+  const lobbyEntry = new URL(BASE);
+  lobbyEntry.searchParams.set('lang', 'zh-Hans');
+  const linkedPage = await ctx.newPage();
+  await linkedPage.goto(lobbyEntry.href);
+  ok(await linkedPage.locator('html').getAttribute('lang') === 'zh-Hans', '從遊戲大廳帶入的語系優先於瀏覽器語系');
+  await linkedPage.evaluate(() => window.I18N.setLang('en'));
+  const returnUrl = new URL(await linkedPage.locator('#lobby-link').getAttribute('href'));
+  ok(returnUrl.searchParams.get('lang') === 'en', '返回遊戲大廳帶上最新語系');
+  await linkedPage.close();
 
   /* ---- 語言按鈕緊鄰設定鈕 ---- */
   const lb = await page.locator('#dd-lang .dd-btn').boundingBox(), sb = await page.locator('#btn-settings').boundingBox();

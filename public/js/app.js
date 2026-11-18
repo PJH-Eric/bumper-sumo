@@ -119,6 +119,10 @@
     if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(measureGW);
   }
   function refreshTexts() {
+    var lobbyLink = $('lobby-link');
+    var lobbyUrl = new URL(lobbyLink.href);
+    lobbyUrl.searchParams.set('lang', I18N.lang);
+    lobbyLink.href = lobbyUrl.href;
     if (langDD) langDD.refresh();
     w.requestAnimationFrame(measureGW);
     Object.keys(dds).forEach(function (k) { if (dds[k]) dds[k].refresh(); });

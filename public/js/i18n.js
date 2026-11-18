@@ -8,6 +8,8 @@
   var missing = {};
 
   function detect() {
+    var linked = root.location && new URLSearchParams(root.location.search).get('lang');
+    if (LANGS.indexOf(linked) >= 0) return linked;
     try { var saved = root.localStorage.getItem(KEY); if (LANGS.indexOf(saved) >= 0) return saved; } catch (e) { /* 無痕模式 */ }
     var nav = (root.navigator && (root.navigator.language || '')) || '';
     if (/^en/i.test(nav)) return 'en';
@@ -40,6 +42,11 @@
       if (LANGS.indexOf(l) < 0) return;
       I18N.lang = l;
       try { root.localStorage.setItem(KEY, l); } catch (e) { /* 存不了就算了 */ }
+      var url = new URL(root.location.href);
+      if (url.searchParams.has('lang')) {
+        url.searchParams.set('lang', l);
+        root.history.replaceState(root.history.state, '', url);
+      }
       I18N.apply(root.document);
       listeners.forEach(function (fn) { try { fn(l); } catch (e) { console.error(e); } });
       try { root.document.dispatchEvent(new CustomEvent('i18n:change', { detail: l })); } catch (e) { /* 舊瀏覽器 */ }

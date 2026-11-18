@@ -32,6 +32,7 @@ try {
   fs.writeFileSync(path.join(temp, 'public/index.html'), source, 'utf8');
   inject(temp, {});
   const built = fs.readFileSync(path.join(temp, 'public/index.html'), 'utf8');
+  assert.ok(built.includes('<title data-i18n-title="' + titleKey + '">'), '正式建置後頁籤標題仍要跟著語系切換');
   assert.equal((built.match(/name="description"/g) || []).length, 1);
   assert.equal((built.match(/rel="canonical"/g) || []).length, 1);
   assert.ok(built.includes('href="' + cfg.siteUrl + '"'));

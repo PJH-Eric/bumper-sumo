@@ -35,7 +35,7 @@ function inject(root, env = process.env) {
   // 保留界線，重複建置不會累積標籤。所有檢查完成才寫入產物。
   html = html.replace(/<!--SEO:HEAD-->[\s\S]*?<!--SEO:END-->/, MARK)
     .replace(/<meta\b(?=[^>]*\bname=["']description["'])[^>]*>\s*/gi, '')
-    .replace(/<title\b[^>]*>[\s\S]*?<\/title>/i, () => '<title>' + esc(cfg.title) + '</title>');
+    .replace(/(<title\b[^>]*>)[\s\S]*?(<\/title>)/i, (_tag, open, close) => open + esc(cfg.title) + close);
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'WebApplication',
     name: cfg.title.split('｜')[0], url: cfg.siteUrl, description: cfg.description,

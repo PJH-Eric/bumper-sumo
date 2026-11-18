@@ -19,16 +19,20 @@
   }
 
   function onKey(e, down) {
-    if (isTyping(e.target)) return;
     if (!enabled) return;
     var code = e.code;
     var game = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyE', 'Enter', 'NumpadEnter'];
     if (game.indexOf(code) < 0) return;
-    if (root.UI && root.UI.Modal.any()) return;
-    e.preventDefault();
-    if (down && !keys[code]) {
-      if (code === 'Space') edge.dash = true;
-      if (code === 'KeyE' || code === 'Enter' || code === 'NumpadEnter') edge.item = true;
+    if (down) {
+      if (isTyping(e.target) || (root.UI && root.UI.Modal.any())) return;
+      var enter = code === 'Enter' || code === 'NumpadEnter';
+      // 保留聚焦按鈕與連結的原生鍵盤操作。
+      if ((enter || code === 'Space') && e.target.closest && e.target.closest('button, a[href]')) return;
+      e.preventDefault();
+      if (!keys[code]) {
+        if (code === 'Space') edge.dash = true;
+        if (code === 'KeyE' || enter) edge.item = true;
+      }
     }
     keys[code] = down;
     if (els.dash) els.dash.classList.toggle('pressed', !!keys.Space);
