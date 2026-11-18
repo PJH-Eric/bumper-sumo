@@ -59,11 +59,11 @@
     MAGNET_PULL: 20,
     SPRING_TIME: 0.6,
     SUPER_MULT: 2,
-    RESCUE_PUSH: 2.4,     // 救回來時往內彈的速度（原 3.2：救回後仍在邊緣附近，別人還有機會補撞）
+    RESCUE_PUSH: 2.0,     // 救回來時往內彈的速度（原 3.2→2.4→2.0：救回後仍在邊緣附近，別人還有機會補撞）
     RESCUE_GRACE: 0.35,
-    RESCUE_HOLD: 0.18,    // 要往內「按住」才救得回來（不是一碰方向就自動救回）：搶救時間的 30%，最多這麼久（見 rescueHoldFor）
+    RESCUE_HOLD: 0.28,    // 要往內「按住」才救得回來（不是一碰方向就自動救回）：搶救時間的 45%，最多這麼久（見 rescueHoldFor）
     RESCUE_IN: 0.6,       // 方向要明確朝內（內向分量 > 0.6）
-    RESCUE_TIRE: 0.7,     // 每救回一次，下次的搶救時間 ×0.7（連續救回越來越難）
+    RESCUE_TIRE: 0.55,    // 每救回一次，下次的搶救時間 ×0.55（連續救回越來越難）
     RESCUE_RECOVER: 6     // 疲勞每 6 秒恢復一次
   };
 
@@ -101,8 +101,8 @@
     return RESCUE[car.level] || RESCUE.normal;
   }
 
-  /** 要按住多久才救得回來：搶救時間的 30%，最多 0.18 秒、最少 0.08 秒（神話 0.25 秒的搶救時間也留得出反應時間） */
-  function rescueHoldFor(c) { return Math.min(C.RESCUE_HOLD, Math.max(0.08, (c.wobbleMax || 0.6) * 0.3)); }
+  /** 要按住多久才救得回來：搶救時間的 45%，最多 0.28 秒、最少 0.1 秒（幼幼～普通 0.28／困難 0.18／神話約 0.11 秒） */
+  function rescueHoldFor(c) { return Math.min(C.RESCUE_HOLD, Math.max(0.1, (c.wobbleMax || 0.6) * 0.45)); }
 
   function newStats() {
     return { kos: 0, dashes: 0, hits: 0, rescues: 0, items: [], ghostDrops: 0, survive: 0, falls: 0 };
@@ -523,7 +523,7 @@
         c.x *= k0; c.y *= k0;
         return;
       }
-      if (c.grace > 0 || d > r + C.CAR_R * 1.2) {
+      if (c.grace > 0 || d > r + C.CAR_R * 0.9) {   // 被撞得很大力（衝出邊緣 0.9 個車身半徑以上）直接掉，不給搶救
         knockOut(s, c, 'edge');
         return;
       }
