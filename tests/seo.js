@@ -43,6 +43,7 @@ try {
   const runServerInjector = (...args) => execFileSync(process.execPath, [injectServerUrl, ...args], {
     env: { ...process.env, GAME_SERVER_URL: '' }
   });
+  runServerInjector();
   assert.equal(readConfig('http://localhost/').source, 'same-origin');
   runServerInjector('--clear');
   assert.equal(readConfig(cfg.siteUrl).status, 'unset', '靜態站未設定後端時只能單機');
