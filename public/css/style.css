@@ -422,6 +422,28 @@ body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
   .pr-row { gap: 5px; }
   .pr-row .btn.small { padding-left: 10px; padding-right: 10px; }
 }
+/* 橫向（寬比高多）：練習工具列改成右側直欄，擂台往左讓、不會因為工具列縮小；收合時只剩「離開」和展開鈕 */
+@media (min-aspect-ratio: 11/10) {
+  .practice-bar { left: auto; right: calc(10px + var(--safe-r)); margin: 0; width: auto; max-width: none; top: calc(64px + var(--safe-t)); padding: 8px; }
+  .pr-items { display: grid; grid-template-columns: repeat(3, auto); }
+  .pr-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; justify-items: center; }
+  .pr-row > .row-label, .pr-row > #pr-count, .pr-row > #pr-reset { grid-column: span 2; }
+  .pr-row > #pr-reset { width: 100%; }
+  .pr-row > #pr-exit, .pr-row > .pr-toggle { width: 100%; }
+  .practice-bar.collapsed .pr-row { grid-template-columns: auto auto; }
+  .practice-bar.collapsed .pr-toggle svg { transform: rotate(-90deg); }   /* 收在右邊：箭頭朝左表示往左展開 */
+  .practice-bar:not(.collapsed) .pr-toggle svg { transform: rotate(90deg); }
+}
+@media (min-aspect-ratio: 11/10) and (max-height: 500px) {   /* 矮的橫向手機：道具｜控制左右並排，整塊放得進衝刺鍵上方 */
+  .practice-bar { top: calc(58px + var(--safe-t)); padding: 6px; gap: 6px; flex-direction: row; align-items: flex-start; }
+  .pr-row { width: auto; grid-template-columns: auto auto; }
+  .pr-row > .row-label { font-size: .75rem; line-height: 1; }
+  #s-game:has(.practice-bar:not([hidden]):not(.collapsed)) .th-right { visibility: hidden; }   /* 右側提示會被展開的工具列蓋住、透出來很亂：展開時先不顯示 */
+  .pr-items { gap: 4px; }
+  .pr-items button { width: 44px; height: 44px; }
+  .pr-items canvas { width: 32px; height: 32px; }
+  .pr-row { gap: 4px; }
+}
 .rotate-tip .btn { flex: none; white-space: nowrap; }
 .rotate-tip { position: absolute; z-index: 11; left: calc(66px + var(--safe-l));   /* 讓開左上角☰ */ right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); display: flex; gap: 10px; align-items: center; padding: 6px 8px 6px 14px; border-radius: 14px; background: rgba(20,14,50,.85); font-weight: 800; max-width: calc(100% - 20px); }
 
