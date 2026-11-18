@@ -220,6 +220,21 @@
       if (li.offsetTop < v.scrollTop) v.scrollTop = li.offsetTop - 6;
       else if (li.offsetTop + li.offsetHeight > v.scrollTop + v.clientHeight) v.scrollTop = li.offsetTop + li.offsetHeight - v.clientHeight + 6;
     }
+    var dirUp = false;
+    /* 頁面捲動時：浮出清單跟著按鈕移動（方向不變）；按鈕整個捲出可視範圍才關閉。
+     * 不能一捲就關——觸控慣性捲動中點按鈕、或聚焦時自動捲到看得見，都會讓選單一打開就被關掉 */
+    function follow() {
+      if (!pop.classList.contains('open')) return;
+      if (!btn.isConnected) { close(); return; }
+      var r = btn.getBoundingClientRect(), box = btn.closest('.sa-view');
+      var cr = box ? box.getBoundingClientRect() : { top: 0, bottom: root.innerHeight };
+      if (r.bottom < cr.top + 4 || r.top > cr.bottom - 4) { close(); return; }
+      if (!o.portal) return;
+      var vh = root.innerHeight, vw = root.innerWidth, lw = pop.offsetWidth || Math.max(r.width, 140);
+      pop.style.left = Math.min(Math.max(8, o.alignRight ? r.right - lw : r.left), vw - lw - 8) + 'px';
+      if (dirUp) { pop.style.top = 'auto'; pop.style.bottom = (vh - r.top + 6) + 'px';   /* top 要明確設 auto：CSS 預設的 top 還在會把清單壓成 0 高 */ }
+      else { pop.style.bottom = 'auto'; pop.style.top = (r.bottom + 6) + 'px'; }
+    }
     function place() {
       var r = btn.getBoundingClientRect();
       var vh = root.innerHeight, vw = root.innerWidth;
@@ -228,15 +243,17 @@
       /* 依選單實際需要的高度決定往上或往下：下面放得下就往下，否則上面放得下就往上，都放不下就往空間大的那邊 */
       var need = Math.min(320, list.scrollHeight + 12) + 16;
       var up = below >= need ? false : above >= need ? true : above > below;
+      dirUp = up;
       var maxH = Math.max(120, Math.min(320, (up ? above : below) - 16));
       pop.style.maxHeight = maxH + 'px';
       if (o.portal) {
         pop.style.position = 'fixed';
-        var lw = Math.max(r.width, 140);
+        pop.style.maxWidth = (vw - 16) + 'px';
+        var lw = Math.max(pop.offsetWidth, r.width, 140);   // 用清單實際寬度（選項可能比按鈕長），才不會超出右邊
         var left = Math.min(Math.max(8, o.alignRight ? r.right - lw : r.left), vw - lw - 8);
         pop.style.left = left + 'px';
-        if (up) { pop.style.top = ''; pop.style.bottom = (vh - r.top + 6) + 'px'; }
-        else { pop.style.bottom = ''; pop.style.top = (r.bottom + 6) + 'px'; }
+        if (up) { pop.style.top = 'auto'; pop.style.bottom = (vh - r.top + 6) + 'px';   /* top 要明確設 auto：CSS 預設的 top 還在會把清單壓成 0 高 */ }
+        else { pop.style.bottom = 'auto'; pop.style.top = (r.bottom + 6) + 'px'; }
       } else {
         pop.classList.toggle('up', up);
       }
@@ -244,6 +261,8 @@
     function open() {
       if (openDD && openDD !== api) openDD.close();
       sweepDD();
+      /* 清單可能在畫面重建時被當成殘留清掉（建立當下按鈕還沒放進畫面）：打開時一定放回去 */
+      if (!pop.isConnected) (o.portal ? doc.body : node).appendChild(pop);
       render();
       pop.classList.add('open'); place();   // 先顯示才量得到選單高度
       btn.setAttribute('aria-expanded', 'true'); node.classList.add('is-open');
@@ -279,7 +298,7 @@
       get: function () { return value; },
       set: function (v) { value = v; render(); if (pop.classList.contains('open')) setActive(active); },   // 開著時更新選項，鍵盤位置不跑掉
       refresh: function () { render(); if (pop.classList.contains('open')) setActive(active); },
-      close: close, open: open, node: node, list: pop, ul: list,
+      close: close, open: open, follow: follow, node: node, list: pop, ul: list,
       setDisabled: function (d) { btn.disabled = !!d; }
     };
     node._dd = api;
@@ -289,9 +308,12 @@
     if (openDD && !openDD.node.contains(e.target) && !openDD.list.contains(e.target)) openDD.close();
   });
   root.addEventListener('resize', function () { if (openDD) openDD.close(); });
-  /* 頁面（選單以外）捲動時關掉選單：浮在 body 上的選單不會跟著按鈕移動，避免跟按鈕分家 */
+  /* 頁面（選單以外）捲動時：選單跟著按鈕走，按鈕捲出畫面才關（見 follow） */
+  var followRaf = 0;
   doc.addEventListener('scroll', function (e) {
-    if (openDD && !(e.target && e.target.nodeType === 1 && openDD.list.contains(e.target))) openDD.close();
+    if (!openDD || (e.target && e.target.nodeType === 1 && openDD.list.contains(e.target))) return;
+    if (followRaf) return;
+    followRaf = root.requestAnimationFrame(function () { followRaf = 0; if (openDD) openDD.follow(); });
   }, true);
   /* 清掉按鈕已經被移除（畫面重建）的下拉選單殘留；開著的也一併關掉 */
   function sweepDD() {
