@@ -1470,7 +1470,7 @@
       /* 重新整理：工作階段還在就自動回到原房間 */
       onlineEntry();
     }
-    w.BumperApp = { S: S, startSolo: startSolo, startPractice: startPractice, show: show, openSolo: openSolo, showResult: showResult, pause: pause };
+    w.BumperApp = { S: S, startSolo: startSolo, startPractice: startPractice, show: show, openSolo: openSolo, showResult: showResult, pause: pause, get renderer() { return renderer; } };   // renderer 唯讀，給測試檢查特效用
   }
   init();
 }(window));

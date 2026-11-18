@@ -59,7 +59,13 @@
   };
   Renderer.prototype.popText = function (x, y, text, color, big) {
     if (this.opts.texts === false) return;   // 首頁背景示範：不跳字，避免跟標題、選單文字疊在一起
-    this.texts.push({ x: x, y: y, text: text, color: color || '#fff', life: big ? 1.2 : 0.8, max: big ? 1.2 : 0.8, big: !!big });
+    /* 同一個字在附近剛跳過就不再跳（連續碰撞不會洗版）；同時最多 3 個 */
+    for (var i = 0; i < this.texts.length; i++) {
+      var o = this.texts[i];
+      if (o.text === text && o.max - o.life < 0.35 && Math.abs(o.x - x) < 1.2 && Math.abs(o.y - y) < 1.2) return;
+    }
+    if (this.texts.length >= 3) this.texts.shift();
+    this.texts.push({ x: x, y: y, text: text, color: color || '#fff', life: big ? 0.9 : 0.65, max: big ? 0.9 : 0.65, big: !!big });
   };
 
   /** 依規則事件產生特效（每步的事件都要丟進來） */
@@ -463,11 +469,12 @@
       var kk = tx.life / tx.max;
       ctx.save();
       ctx.globalAlpha = Math.min(1, kk * 2);
-      var fs = Math.round(u * (tx.big ? 0.75 : 0.45) * (1 + (1 - kk) * 0.25));
+      /* 特效字：小而短，不擋畫面（一般約 0.28 車身、重擊 0.38 車身，最大 22／28px） */
+      var fs = Math.round(Math.max(11, Math.min(tx.big ? 28 : 22, u * (tx.big ? 0.38 : 0.28))) * (1 + (1 - kk) * 0.1));
       ctx.font = '900 ' + fs + 'px "Baloo 2", "Noto Sans TC", system-ui, sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.lineWidth = fs * 0.18; ctx.strokeStyle = '#2a1a4a'; ctx.lineJoin = 'round';
-      var yy = H(tx.y) - (1 - kk) * u * 0.6;
+      ctx.lineWidth = Math.max(2.5, fs * 0.2); ctx.strokeStyle = '#2a1a4a'; ctx.lineJoin = 'round';
+      var yy = H(tx.y) - (1 - kk) * u * 0.4;
       ctx.strokeText(tx.text, W(tx.x), yy); ctx.fillStyle = tx.color; ctx.fillText(tx.text, W(tx.x), yy);
       ctx.restore();
     }
