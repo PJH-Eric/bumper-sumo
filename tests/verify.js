@@ -113,7 +113,33 @@ function hitTest(dash) {
   ok(c.wobble > 0 && near(c.wobbleMax, R.RESCUE.normal), '碰到邊緣進入搖搖欲墜（單機玩家用本局難度：普通 0.6 秒）');
   ok(c.alive, '搖搖欲墜時還沒出局');
   R.setInput(s, 'p0', { mx: -1, my: 0 }); R.step(s);
-  ok(c.wobble === 0 && c.alive && c.stats.rescues === 1 && c.vx < 0, '往內按救回來');
+  ok(c.wobble > 0 && c.stats.rescues === 0, '只按一下（一幀）不會馬上救回來');
+  stepN(s, secs(R.C.RESCUE_HOLD) + 1, () => R.setInput(s, 'p0', { mx: -1, my: 0 }));
+  ok(c.wobble === 0 && c.alive && c.stats.rescues === 1 && c.vx < 0, '往內按住 0.18 秒救回來');
+
+  /* 放開就重算：按一下放開再按，要重新按滿 */
+  const sr = match(3); sr.t = 5; park(sr);
+  const e = sr.cars[0]; e.x = sr.arena.r - 0.02; e.y = 0; e.vx = 3;
+  R.step(sr);
+  stepN(sr, 6, () => R.setInput(sr, 'p0', { mx: -1, my: 0 }));
+  R.setInput(sr, 'p0', { mx: 0, my: 0 }); R.step(sr);
+  ok(e.rescueHold === 0 && e.wobble > 0, '放開方向，按住的進度歸零');
+  /* 方向不夠朝內（斜 60° 左右）不算 */
+  stepN(sr, 6, () => R.setInput(sr, 'p0', { mx: -0.5, my: 0.866 }));
+  ok(e.rescueHold === 0, '方向不夠朝內不算在救');
+  ok(near(R.rescueHoldFor({ wobbleMax: R.RESCUE.mythic }), 0.08) && near(R.rescueHoldFor({ wobbleMax: R.RESCUE.hard }), 0.12) && near(R.rescueHoldFor({ wobbleMax: R.RESCUE.kid }), 0.18), '按住時間依難度：神話 0.08／困難 0.12／幼幼～普通 0.18 秒');
+
+  /* 疲勞：剛救回又上邊緣，搶救時間 ×0.7 */
+  const st = match(3); st.t = 5; park(st);
+  const f = st.cars[0]; f.x = st.arena.r - 0.02; f.y = 0; f.vx = 3;
+  R.step(st);
+  stepN(st, secs(R.C.RESCUE_HOLD) + 1, () => R.setInput(st, 'p0', { mx: -1, my: 0 }));
+  R.setInput(st, 'p0', { mx: 0, my: 0 });
+  stepN(st, secs(R.C.RESCUE_GRACE) + 2);   // 先過救回後的保護期（保護期內再出界會直接掉）
+  f.x = st.arena.r - 0.02; f.y = 0; f.vx = 3; R.step(st);
+  ok(f.wobble > 0 && f.wobble < f.wobbleMax * 0.75, '剛救回又碰到邊緣：搶救時間變短（×0.7）');
+  stepN(st, secs(R.C.RESCUE_RECOVER) + 2);
+  ok(f.rescueTire === 0 || !f.alive, '疲勞 6 秒後恢復');
 
   const s2 = match(3); s2.t = 5; park(s2);
   const d = s2.cars[0]; d.x = s2.arena.r - 0.02; d.y = 0; d.vx = 3;

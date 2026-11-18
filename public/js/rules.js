@@ -59,8 +59,12 @@
     MAGNET_PULL: 20,
     SPRING_TIME: 0.6,
     SUPER_MULT: 2,
-    RESCUE_PUSH: 3.2,
-    RESCUE_GRACE: 0.35
+    RESCUE_PUSH: 2.4,     // 救回來時往內彈的速度（原 3.2：救回後仍在邊緣附近，別人還有機會補撞）
+    RESCUE_GRACE: 0.35,
+    RESCUE_HOLD: 0.18,    // 要往內「按住」才救得回來（不是一碰方向就自動救回）：搶救時間的 30%，最多這麼久（見 rescueHoldFor）
+    RESCUE_IN: 0.6,       // 方向要明確朝內（內向分量 > 0.6）
+    RESCUE_TIRE: 0.7,     // 每救回一次，下次的搶救時間 ×0.7（連續救回越來越難）
+    RESCUE_RECOVER: 6     // 疲勞每 6 秒恢復一次
   };
 
   /* ---------- 亂數（mulberry32，狀態是一個整數，可直接序列化） ---------- */
@@ -97,6 +101,9 @@
     return RESCUE[car.level] || RESCUE.normal;
   }
 
+  /** 要按住多久才救得回來：搶救時間的 30%，最多 0.18 秒、最少 0.08 秒（神話 0.25 秒的搶救時間也留得出反應時間） */
+  function rescueHoldFor(c) { return Math.min(C.RESCUE_HOLD, Math.max(0.08, (c.wobbleMax || 0.6) * 0.3)); }
+
   function newStats() {
     return { kos: 0, dashes: 0, hits: 0, rescues: 0, items: [], ghostDrops: 0, survive: 0, falls: 0 };
   }
@@ -112,7 +119,7 @@
       angle: ang + Math.PI,            // 車頭朝中心
       alive: true, outAt: null, place: 0,
       dash: { phase: 'idle', t: 0, cd: 0 },
-      wobble: 0, wobbleMax: 0, grace: 0,
+      wobble: 0, wobbleMax: 0, grace: 0, rescueHold: 0, rescueTire: 0,
       item: null,
       fx: { iron: 0, shield: 0, superDash: false, spin: 0, spring: null, magnet: 0, flash: 0 },
       lastHit: null,
@@ -483,13 +490,16 @@
     var r = s.arena.r;
     var d = len(c.x, c.y);
     if (c.grace > 0) c.grace = Math.max(0, c.grace - DT);
+    if (c.rescueTire > 0) c.rescueTire = Math.max(0, c.rescueTire - DT / C.RESCUE_RECOVER);
     if (c.wobble > 0) {
       var nx = c.x / Math.max(d, 1e-6), ny = c.y / Math.max(d, 1e-6);
-      /* 往內按就救回來 */
+      /* 往內「按住」RESCUE_HOLD 秒才救回來；放開或方向不夠朝內就重算 */
       var inward = -(c.input.mx * nx + c.input.my * ny);
       var spinning = c.fx.spin > 0;
-      if (!spinning && inward > 0.45) {
-        c.wobble = 0;
+      c.rescueHold = (!spinning && inward > C.RESCUE_IN) ? c.rescueHold + DT : 0;
+      if (c.rescueHold >= rescueHoldFor(c) - 1e-9) {
+        c.wobble = 0; c.rescueHold = 0;
+        c.rescueTire += 1;   // 疲勞：下次的搶救時間變短
         c.grace = C.RESCUE_GRACE;
         c.vx = -nx * C.RESCUE_PUSH; c.vy = -ny * C.RESCUE_PUSH;
         c.x = nx * (r - 0.05); c.y = ny * (r - 0.05);
@@ -517,7 +527,8 @@
         knockOut(s, c, 'edge');
         return;
       }
-      c.wobble = c.wobbleMax;
+      c.wobble = c.wobbleMax * Math.pow(C.RESCUE_TIRE, Math.ceil(c.rescueTire - 1e-9));   // 剛救回過（6 秒內）又上邊緣：時間變短，連續救回越來越難
+      c.rescueHold = 0;
       c.dash.phase = 'idle';
       var k1 = r / d;
       c.x *= k1; c.y *= k1;
@@ -810,7 +821,7 @@
         return {
           id: c.id, x: r2(c.x), y: r2(c.y), vx: r2(c.vx), vy: r2(c.vy), a: r2(c.angle),
           al: c.alive ? 1 : 0, dp: c.dash.phase === 'idle' ? 0 : (c.dash.phase === 'charge' ? 1 : 2), dt: r2(c.dash.t), dc: r2(c.dash.cd),
-          w: r2(c.wobble), wm: c.wobbleMax, it: c.item,
+          w: r2(c.wobble), wm: c.wobbleMax, rh: r2(c.rescueHold), rt: r2(c.rescueTire), it: c.item,
           fx: [r2(c.fx.iron), r2(c.fx.shield), c.fx.superDash ? 1 : 0, r2(c.fx.spin), c.fx.spring ? [r2(c.fx.spring.t), r2(c.fx.spring.fx), r2(c.fx.spring.fy), r2(c.fx.spring.tx), r2(c.fx.spring.ty)] : 0, r2(c.fx.magnet), r2(c.fx.flash)],
           g: c.ghost ? [r2(c.ghost.theta), r2(c.ghost.cd), r2(c.ghost.fallT), r2(c.ghost.fx), r2(c.ghost.fy)] : 0,
           m: c.mood, k: c.stats.kos, pl: c.place
@@ -831,7 +842,7 @@
       c.x = sc.x; c.y = sc.y; c.vx = sc.vx; c.vy = sc.vy; c.angle = sc.a;
       c.alive = !!sc.al;
       c.dash.phase = sc.dp === 0 ? 'idle' : (sc.dp === 1 ? 'charge' : 'burst'); c.dash.t = sc.dt; c.dash.cd = sc.dc;
-      c.wobble = sc.w; c.wobbleMax = sc.wm; c.item = sc.it;
+      c.wobble = sc.w; c.wobbleMax = sc.wm; c.rescueHold = sc.rh || 0; c.rescueTire = sc.rt || 0; c.item = sc.it;
       c.fx.iron = sc.fx[0]; c.fx.shield = sc.fx[1]; c.fx.superDash = !!sc.fx[2]; c.fx.spin = sc.fx[3];
       c.fx.spring = sc.fx[4] ? { t: sc.fx[4][0], fx: sc.fx[4][1], fy: sc.fx[4][2], tx: sc.fx[4][3], ty: sc.fx[4][4] } : null;
       c.fx.magnet = sc.fx[5]; c.fx.flash = sc.fx[6];
@@ -843,7 +854,7 @@
   }
 
   return {
-    DT: DT, C: C, LEVELS: LEVELS, RESCUE: RESCUE, ITEM_TYPES: ITEM_TYPES,
+    DT: DT, C: C, LEVELS: LEVELS, RESCUE: RESCUE, rescueHoldFor: rescueHoldFor, ITEM_TYPES: ITEM_TYPES,
     createMatch: createMatch, step: step, setInput: setInput, getCar: getCar,
     aliveCars: aliveCars, radiusAt: radiusAt, result: result, finish: finish,
     ghostActive: ghostActive, rand: rand, hashSeed: hashSeed, len: len,

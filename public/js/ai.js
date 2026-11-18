@@ -89,7 +89,7 @@
       if (c.item === 'spring' && p.items >= 0.8) out.item = true;
       if (rnd(b) < p.rescue) mv = [-nx, -ny];
       else mv = [nx * 0.3 + (rnd(b) - 0.5), ny * 0.3 + (rnd(b) - 0.5)];
-      return finish(b, out, mv);
+      return finish(b, out, mv, p.rescue >= 1);   // 自救要按住往內：普通以上穩穩按住，低難度手會抖（按不滿就救不回）
     }
 
     /* 2. 被衝撞威脅：護盾、側閃 */
@@ -111,6 +111,8 @@
     /* 3. 太靠邊：先回中間 */
     var future = R.radiusAt(s, s.t + (b.level === 'mythic' ? 3 : 1));
     var safeR = Math.min(r, future) * p.safe;
+    /* 剛救回過（疲勞中，下次搶救時間會變短）：困難、神話會刻意離邊緣遠一點 */
+    if (c.rescueTire > 0 && (b.level === 'hard' || b.level === 'mythic')) safeR *= b.level === 'mythic' ? 0.8 : 0.9;
     if (p.edgeAware > 0 && d > safeR && rnd(b) < p.edgeAware) {
       if (c.item === 'spring' && d > r * 0.9 && p.items >= 0.8) out.item = true;
       mv = seek(b, c, 0, 0, b.level === 'hard' || b.level === 'mythic' ? 0.35 : 0);
