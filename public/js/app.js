@@ -550,10 +550,13 @@
   function updateGhostTip() {
     var tip = $('ghost-tip');
     var me = S.match && R.getCar(S.match, S.myId);
-    if (!S.match || !me || me.alive || S.match.phase === 'over' || S.mode === 'practice') { tip.hidden = true; return; }
-    tip.hidden = false;
-    $('rotate-tip').hidden = true;   // 兩個提示同一位置，幽靈提示優先
-    tip.textContent = !S.match.opts.items ? t('ghost.noItems') : (R.ghostActive(S.match) ? t('ghost.tip') : t('ghost.stopped'));
+    if (!S.match || !me || me.alive || S.match.phase === 'over' || S.mode === 'practice') { tip.hidden = true; S.ghostTipText = ''; return; }
+    var text = !S.match.opts.items ? t('ghost.noItems') : (R.ghostActive(S.match) ? t('ghost.tip') : t('ghost.stopped'));
+    /* 只在剛出局、或內容改變（例如只剩 2 台幽靈停手）時顯示 5 秒，之後淡出，不一直擋住畫面上方 */
+    if (text !== S.ghostTipText) { S.ghostTipText = text; S.ghostTipUntil = performance.now() + 5000; tip.textContent = text; clearTimeout(S.ghostTipTimer); S.ghostTipTimer = setTimeout(updateGhostTip, 5100); }
+    var show = performance.now() < S.ghostTipUntil;
+    tip.hidden = !show;
+    if (show) $('rotate-tip').hidden = true;   // 兩個提示同一位置，幽靈提示優先
   }
 
   /* ---------- 左側戰況 Summary ---------- */
@@ -829,6 +832,16 @@
     prCount = UI.Stepper('#pr-count', { value: S.practiceN, min: 0, max: 5, labels: function () { return { minus: t('solo.less'), plus: t('solo.more') }; }, onChange: function (v) { S.practiceN = v; } });
     $('pr-reset').addEventListener('click', function () { if (S.match) { S.match = R.practiceReset(S.match, S.practiceN); renderer.clearFx(); } });
     $('pr-exit').addEventListener('click', function () { quitMatch('home'); });
+    /* 練習工具列可收起（記住上次），收起後擂台會自動往上讓出空間 */
+    var prKey = 'bumper-sumo:v1:prCollapsed';
+    var setPr = function (c) {
+      $('practice-bar').classList.toggle('collapsed', c);
+      $('pr-toggle').setAttribute('aria-expanded', c ? 'false' : 'true');
+      try { localStorage.setItem(prKey, c ? '1' : '0'); } catch (e) { /* 無痕模式 */ }
+      S.insetAt = 0;
+    };
+    try { if (localStorage.getItem(prKey) === '1') setPr(true); } catch (e) { /* 無痕模式 */ }
+    $('pr-toggle').addEventListener('click', function () { setPr(!$('practice-bar').classList.contains('collapsed')); });
     doc.addEventListener('visibilitychange', function () { if (doc.hidden && S.screen === 'game' && S.mode === 'solo' && S.match && S.match.phase !== 'over' && !UI.Modal.any()) pause(); });
     w.addEventListener('resize', function () { if (S.screen === 'game') { if (!narrow() && $('side').classList.contains('collapsed') && !S.sideUser) sideSet(true); } if (S.screen === 'solo') drawThemePreview(); });
   }

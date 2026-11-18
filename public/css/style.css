@@ -363,7 +363,8 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .hud-alive { color: var(--muted); }
 .role-pill { padding: 4px 12px; border-radius: 999px; background: rgba(47,214,245,.25); font-weight: 800; }
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
-.ghost-tip { position: absolute; z-index: 9; left: calc(10px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); max-width: min(90%, 520px); padding: 8px 16px; border-radius: 14px; background: rgba(156,123,255,.85); font-weight: 800; text-align: center; pointer-events: none; }
+.ghost-tip { position: absolute; z-index: 9; left: calc(66px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); max-width: min(92%, 520px); padding: 5px 14px; border-radius: 12px; background: rgba(120,92,230,.72); font-size: .86rem; line-height: 1.35; font-weight: 800; text-align: center; pointer-events: none; animation: tipLife 5s ease forwards; }   /* 小一點、半透明，5 秒後淡出 */
+@keyframes tipLife { 0% { opacity: 0; transform: translateY(-6px); } 6% { opacity: 1; transform: none; } 88% { opacity: 1; } 100% { opacity: 0; } }
 .countdown {
   position: absolute; z-index: 25; inset: 0; display: grid; place-items: center; pointer-events: none;
   font: 900 clamp(96px, 26vmin, 220px)/1 var(--font); color: #fff; -webkit-text-stroke: 10px var(--ink); paint-order: stroke fill;
@@ -399,12 +400,20 @@ body:not(.touch-on) .touch { display: block; }
 body:not(.touch-on) .joy-zone { display: none; }
 body:not(.touch-on) .tbtns { --tb-size: .62; opacity: .9; }
 
-.practice-bar { position: absolute; z-index: 12; left: calc(66px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); display: flex; flex-direction: column; gap: 6px; align-items: center; max-width: calc(100% - 20px);   /* 不用 left:50%＋translate（那樣可用寬度只剩一半，道具會被擠成兩排） */ padding: 8px 10px; border-radius: 16px; background: rgba(20,14,50,.82); }
+.practice-bar { position: absolute; z-index: 12; left: calc(66px + var(--safe-l)); right: calc(10px + var(--safe-r)); margin: 0 auto; width: fit-content; top: calc(64px + var(--safe-t)); display: flex; flex-direction: column; gap: 6px; align-items: center; max-width: calc(100% - 20px);   /* 不用 left:50%＋translate（那樣可用寬度只剩一半，道具會被擠成兩排） */ padding: 8px 10px; border-radius: 16px; background: rgba(20,14,50,.72); }
 .pr-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .pr-items button { width: 48px; height: 48px; border: 0; border-radius: 12px; background: rgba(255,255,255,.14); cursor: pointer; display: grid; place-items: center; box-shadow: 0 3px 0 rgba(0,0,0,.3); }
 .pr-items canvas { width: 36px; height: 36px; }
 .pr-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .pr-row .row-label { flex: none; }
+/* 收合鈕：收起後只留「練習工具」＋「離開」，不擋擂台 */
+.pr-toggle { flex: none; min-width: 44px; height: 44px; padding: 0 10px; border: 0; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: rgba(255,255,255,.14); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.pr-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
+.pr-toggle-label { display: none; }
+.practice-bar.collapsed { padding: 4px 6px; background: rgba(20,14,50,.55); }
+.practice-bar.collapsed .pr-items, .practice-bar.collapsed .pr-row > .row-label, .practice-bar.collapsed #pr-count, .practice-bar.collapsed #pr-reset { display: none; }
+.practice-bar.collapsed .pr-toggle-label { display: inline; }
+.practice-bar.collapsed .pr-toggle svg { transform: rotate(180deg); }
 @media (max-width: 480px) {   /* 窄手機：工具列讓開左上角☰，道具鈕 44px、間距縮小，盡量一排放完 */
   .practice-bar { padding: 6px 8px; }
   .pr-items { gap: 4px; }
