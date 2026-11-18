@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   var socket = null, loading = null, handlers = {}, status = 'idle', sid = null;
-  var lastMsg = 0, watchdog = null, pinger = null, rtt = 0;
+  var lastMsg = 0, watchdog = null, pinger = null, rtt = 0, connectionAttempt = 0;
   var SID_KEY = 'bumper-sumo:v1:sid';
 
   function emitLocal(evt, data) { (handlers[evt] || []).forEach(function (fn) { try { fn(data); } catch (e) { console.error(e); } }); }
@@ -39,8 +39,10 @@
     connect: function (profile) {
       if (!root.GameConfig.isOnlineEnabled()) { setStatus('unavailable'); return Promise.reject(new Error('unavailable')); }
       if (socket) { if (!socket.connected) socket.connect(); return Promise.resolve(); }
+      var attempt = ++connectionAttempt;
       setStatus('connecting');
       return loadLib().then(function () {
+        if (attempt !== connectionAttempt) return;
         socket = root.io(root.GameConfig.serverUrl, { transports: ['websocket', 'polling'], reconnectionDelay: 800, reconnectionDelayMax: 4000, timeout: 20000 });
         if (root.NetworkLatency && root.NetworkLatency.bindSocketIo) root.NetworkLatency.bindSocketIo(socket);
         /* 任何訊息都算活著；超過 5 秒沒消息就判定斷線並重連 */
@@ -69,10 +71,15 @@
           'lobbychat:history', 'lobbychat:msg', 'lobbychat:online', 'lobbychat:error'].forEach(function (evt) {
           socket.on(evt, function (d) { emitLocal(evt, d); });
         });
-      }).catch(function (e) { setStatus('error'); throw e; });
+      }).catch(function (e) {
+        if (attempt !== connectionAttempt) return;
+        setStatus('error');
+        throw e;
+      });
     },
     /** 離開線上模式：斷線並停止所有背景工作 */
     disconnect: function () {
+      connectionAttempt++;
       clearInterval(watchdog); clearInterval(pinger); watchdog = null; pinger = null;
       if (socket) { socket.removeAllListeners(); socket.offAny(); socket.disconnect(); socket = null; }
       setStatus('idle');

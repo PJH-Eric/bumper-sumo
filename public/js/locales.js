@@ -291,8 +291,8 @@
 
   /* 伺服器斷線提示（共用 server-outage.js） */
   root.ServerOutageMessages = {
-    'zh-Hant': ['線上暫時無法連線', '免費伺服器額度將於 {date} 月 1 日重置，期間可繼續遊玩單機版。', '知道了'],
-    'zh-Hans': ['线上暂时无法连线', '免费服务器额度将于 {date} 月 1 日重置，期间可继续游玩单机版。', '知道了'],
-    en: ['Online unavailable', 'Free server quota resets on {date}. You can keep playing offline.', 'Got it']
+    'zh-Hant': ['線上暫時無法連線', '請稍後再試，也可以先玩單機或自由練習。', '知道了'],
+    'zh-Hans': ['线上暂时无法连线', '请稍后再试，也可以先玩单机或自由练习。', '知道了'],
+    en: ['Online play is unavailable', 'Try again later, or play solo or in Free Practice.', 'Got it']
   };
 }(typeof window !== 'undefined' ? window : globalThis));

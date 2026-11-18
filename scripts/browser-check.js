@@ -265,6 +265,46 @@ async function main() {
     ok(await D.evaluate(() => document.querySelector('#s-howto .sa-view').scrollTop > 0), '滑鼠停在自繪捲軸上滾輪也能捲');
     await D.context().close();
   }
+  /* 初次載入線上程式時離開，晚到的程式只可供日後使用。 */
+  const delayed = await browser.newPage({ locale: 'zh-TW' });
+  let releaseScript;
+  const pendingScript = new Promise(resolve => { releaseScript = resolve; });
+  await delayed.route('**/socket.io/socket.io.js', async (route) => {
+    await pendingScript;
+    await route.continue();
+  });
+  await delayed.goto(BASE);
+  const requestedScript = delayed.waitForRequest('**/socket.io/socket.io.js');
+  await delayed.click('#btn-online');
+  await requestedScript;
+  await delayed.click('#s-lobby .back-btn');
+  let lateSockets = 0;
+  delayed.on('websocket', () => { lateSockets++; });
+  releaseScript();
+  await delayed.waitForFunction(() => typeof window.io === 'function');
+  await delayed.waitForTimeout(250);
+  ok(lateSockets === 0 && await delayed.evaluate(() => window.BumperNet.status()) === 'idle', '離開線上大廳後，晚到的 Socket.IO 程式不會重開連線');
+  await delayed.click('#btn-online');
+  await delayed.waitForFunction(() => window.BumperNet.connected());
+  await delayed.click('#s-lobby .back-btn');
+  await delayed.close();
+
+  const offline = await browser.newPage({ locale: 'zh-TW' });
+  await offline.clock.install();
+  await offline.route('**/socket.io/socket.io.js', route => route.abort());
+  await offline.goto(BASE);
+  await offline.click('#btn-online');
+  await offline.waitForFunction(() => window.BumperNet.status() === 'error');
+  ok(!(await offline.isVisible('#server-outage-message')), '連線剛失敗時先保留大廳提示');
+  await offline.clock.fastForward(30001);
+  await offline.locator('#server-outage-message').waitFor();
+  ok((await offline.textContent('#server-outage-message')).includes('稍後再試'), '連線逾時提示提供可用的下一步');
+  await offline.keyboard.press('Escape');
+  ok(!(await offline.isVisible('#server-outage-message')), 'Escape 可關閉斷線提示');
+  await offline.click('#s-lobby .back-btn');
+  await offline.clock.fastForward(30001);
+  ok(!(await offline.isVisible('#server-outage-message')), '離開線上模式後斷線提示不會再彈出');
+  await offline.close();
   await browser.close();
   console.log((fail ? '✗' : '✓') + ' 瀏覽器檢查 ' + pass + ' 項通過' + (fail ? '，' + fail + ' 項失敗' : ''));
   process.exitCode = fail ? 1 : 0;

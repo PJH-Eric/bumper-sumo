@@ -7,16 +7,9 @@
   var eligible = false, attempted = false, connectionState = 'idle';
   var WAIT_MS = 30000; // User-selected online connection timeout; cancel on recovery or exit.
 
-  function copy(now, language) {
-    var next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  function copy(language) {
     var locale = /^en/i.test(language) ? 'en' : /Hans|CN|SG/i.test(language) ? 'zh-Hans' : 'zh-Hant';
-    var words = w.ServerOutageMessages[locale].slice();
-    var date = locale === 'en'
-      ? next.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-      : String(next.getMonth() + 1);
-    // Keep all player-facing translations in locales.js.
-    words[1] = words[1].replace('{date}', date);
-    return words;
+    return w.ServerOutageMessages[locale];
   }
 
   function close() {
@@ -38,7 +31,7 @@
     if (shown || !active || !eligible) return;
     shown = true;
     previousFocus = document.activeElement;
-    var words = copy(new Date(), document.documentElement.lang || 'zh-Hant');
+    var words = copy(document.documentElement.lang || 'zh-Hant');
     mask = document.createElement('div');
     mask.className = 'server-outage-mask';
     var panel = document.createElement('section');
@@ -99,5 +92,5 @@
     timer = setTimeout(show, WAIT_MS);
   }
 
-  w.ServerOutage = { state: state, setScreen: setScreen, copy: copy };
+  w.ServerOutage = { state: state, setScreen: setScreen };
 })(window);
