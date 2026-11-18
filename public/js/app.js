@@ -357,7 +357,9 @@
     $('hud-bar').hidden = S.mode === 'practice';
     $('game-chat').hidden = S.mode !== 'online';
     $('btn-pause').setAttribute('aria-label', t(S.mode === 'online' ? 'game.menu' : 'game.pause'));
-    $('hud-role').hidden = !(S.mode === 'online' && S.online.role === 'spectator');
+    var spectating = S.mode === 'online' && S.online.role === 'spectator';
+    $('touch').hidden = spectating;
+    $('hud-role').hidden = !spectating;
     $('hud-role').textContent = t('room.roleSpectator');
     show('game');
     sideDefault();

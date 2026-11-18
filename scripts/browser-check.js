@@ -198,6 +198,7 @@ async function main() {
   await B.waitForFunction(() => window.BumperApp.S.match && window.BumperApp.S.match.phase === 'playing', null, { timeout: 6000 });
   ok(await C.isVisible('#hud-role'), '觀戰者畫面標示觀戰中');
   ok(await C.evaluate(() => !window.BumperRules.getCar(window.BumperApp.S.match, window.BumperApp.S.myId)), '觀戰者沒有車');
+  ok(!(await C.isVisible('#touch')) && await C.isVisible('#side-toggle'), '觀戰畫面保留戰況入口並隱藏玩家控制');
   ok(await B.isVisible('#joy-zone') && await B.isVisible('#btn-dash'), '手機有觸控搖桿與衝刺鍵');
   /* 手機觸控搖桿推一下，車子會動 */
   const bx0 = await B.evaluate(() => { const c = window.BumperRules.getCar(window.BumperApp.S.match, window.BumperApp.S.myId); return c.x; });
