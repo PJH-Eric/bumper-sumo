@@ -38,15 +38,18 @@
   Renderer.prototype.layout = function (viewR) {
     var pad = 1.75;   // 幽靈外圈＋厚度
     /* insets：上方狀態列與下方觸控鍵佔掉的高度（直向手機時由 app 提供），擂台放在中間那塊空間，不被手指擋住 */
-    var it = this.insets || { top: 0, bottom: 0 };
+    var it = this.insets || { top: 0, bottom: 0, right: 0 };
     var top = it.top, avail = this.h - it.top - it.bottom;
     if (avail < this.h * 0.45) { top = 0; avail = this.h; }   // 空間太小就退回全畫面
     var u = Math.min(this.w / (2 * (viewR + pad)), avail / (2 * (viewR + pad) + 0.6));
-    return { u: u, cx: this.w / 2, cy: top + avail / 2 - u * 0.25 };
+    /* 右側有工具列：擂台大小不變，只往左挪到不被蓋住（左邊不夠才停在最左） */
+    var cx = this.w / 2, half = u * (viewR + pad);
+    if (it.right && cx + half > this.w - it.right) cx = Math.max(half, this.w - it.right - half);
+    return { u: u, cx: cx, cy: top + avail / 2 - u * 0.25 };
   };
   /** 設定上下保留區（CSS px）；直向時讓擂台避開 HUD 與觸控鍵 */
-  Renderer.prototype.setInsets = function (top, bottom) {
-    this.insets = { top: Math.max(0, top || 0), bottom: Math.max(0, bottom || 0) };
+  Renderer.prototype.setInsets = function (top, bottom, right) {
+    this.insets = { top: Math.max(0, top || 0), bottom: Math.max(0, bottom || 0), right: Math.max(0, right || 0) };
   };
 
   /* ---------- 粒子 ---------- */
@@ -194,7 +197,7 @@
     ctx.restore();
   };
 
-  Renderer.prototype.drawMePin = function (ctx, x, y, u, t) {
+  Renderer.prototype.drawMePin = function (ctx, x, y, u, t, team) {
     var au = Math.max(u, 38);
     var bob = this.opts.reduce ? 0 : Math.abs(Math.sin(t * 4)) * au * 0.12;
     var fs = Math.max(13, Math.round(au * 0.34));
@@ -210,6 +213,10 @@
     ctx.moveTo(x - fs * 0.38, boxY + th - 1); ctx.lineTo(x, tipY); ctx.lineTo(x + fs * 0.38, boxY + th - 1); ctx.closePath();
     ctx.stroke(); ctx.fill();
     Art.rr(ctx, x - tw / 2, boxY, tw, th, th / 2); ctx.stroke(); ctx.fill();
+    if (team) {   // 組隊：「你」外面再包一圈自己隊伍的顏色，一看就知道自己是哪一隊
+      ctx.strokeStyle = team; ctx.lineWidth = Math.max(2.5, fs * 0.2);
+      Art.rr(ctx, x - tw / 2 - fs * 0.22, boxY - fs * 0.22, tw + fs * 0.44, th + fs * 0.44, th / 2 + fs * 0.22); ctx.stroke();
+    }
     ctx.fillStyle = '#2a1650'; ctx.fillText(label, x, boxY + th / 2 + 1);
     ctx.restore();
   };
@@ -237,10 +244,15 @@
       }
       ctx.restore();
     }
-    /* 隊伍色外框 */
-    if (s.opts.teams && !c.dummy) {
-      ctx.save(); ctx.strokeStyle = view.teamColors[c.team % view.teamColors.length]; ctx.lineWidth = Math.max(2, u * 0.1);
-      Art.circle(ctx, x, y + u * 0.08, u * 0.58); ctx.stroke(); ctx.restore();
+    /* 組隊：腳下一圈隊伍色的地板光（半透明實心＋粗外框），遠遠就分得出哪幾台同一隊 */
+    var tcol = (s.opts.teams && !c.dummy) ? view.teamColors[c.team % view.teamColors.length] : null;
+    if (tcol) {
+      var tr = Math.max(u * 0.74, 17);
+      ctx.save();
+      ctx.globalAlpha = 0.42; ctx.fillStyle = tcol; Art.circle(ctx, x, y + u * 0.08, tr); ctx.fill();
+      ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(20,14,50,0.5)'; ctx.lineWidth = Math.max(5, u * 0.2); Art.circle(ctx, x, y + u * 0.08, tr); ctx.stroke();
+      ctx.strokeStyle = tcol; ctx.lineWidth = Math.max(3, u * 0.13); Art.circle(ctx, x, y + u * 0.08, tr); ctx.stroke();
+      ctx.restore();
     }
     /* 磁鐵波紋 */
     if (c.fx.magnet > 0) {
@@ -323,7 +335,10 @@
       ctx.restore();
     }
     /* 自己的車頭上：會上下跳的「你」指標（關掉名牌也一直顯示，避免找不到自己） */
-    if (mine) this.drawMePin(ctx, x, y - lift - (c.wobble > 0 ? u * 0.6 : 0) - (c.fx.spin > 0 ? u * 0.35 : 0), u, t);
+    if (mine) this.drawMePin(ctx, x, y - lift - (c.wobble > 0 ? u * 0.6 : 0) - (c.fx.spin > 0 ? u * 0.35 : 0), u, t, tcol);
+    var me = null;
+    if (tcol && !mine) for (var mi = 0; mi < s.cars.length; mi++) if (s.cars[mi].id === view.myId) me = s.cars[mi];
+    var ally = !!(me && me.team === c.team);
     /* 名牌 */
     var tagName = view.nameOf ? view.nameOf(c) : c.name;
     if (mine && tagName === this.labels.you && c.item) {   // 單機時名牌也是「你」，頭上已有指標就不重複，只留持有道具的小圖示
@@ -337,7 +352,7 @@
       /* 名牌先收集，等所有車畫完再統一排版（避免車擠在一起時名牌互相疊住） */
       var name = tagName;
       if (u < 26 && !mine) name = name.replace(/\s*[（(][^）)]*[）)]\s*$/, '');   // 手機上車很小：電腦名牌省略難度，只留名字
-      (this._tags || (this._tags = [])).push({ x: x, y: y + u * 0.72 - lift, name: name, mine: mine, item: (c.item && (mine || view.showItems)) ? c.item : null });
+      (this._tags || (this._tags = [])).push({ x: x, y: y + u * 0.72 - lift, name: name, mine: mine, item: (c.item && (mine || view.showItems)) ? c.item : null, team: tcol, ally: ally, foe: !!(me && !ally) });
     }
   };
 
@@ -353,7 +368,9 @@
     var hit = function (r) { for (var i = 0; i < placed.length; i++) { var q = placed[i]; if (r.l < q.r && r.r > q.l && r.t < q.b && r.b > q.t) return true; } return false; };
     for (var i = 0; i < tags.length; i++) {
       var g = tags[i];
-      var tw = ctx.measureText(g.name).width + fs * 0.8, extra = g.item ? fs * 1.3 : 0;
+      var chip = g.ally ? (this.labels.ally || 'ALLY') : g.foe ? (this.labels.foe || 'RIVAL') : '';
+      var cw = chip ? ctx.measureText(chip).width * 0.82 + fs * 0.7 : 0;   // 組隊：名牌左邊加「隊友／對手」小標
+      var tw = ctx.measureText(g.name).width + fs * 0.8 + cw, extra = g.item ? fs * 1.3 : 0;
       var offs = [0, h * 1.08, h * 2.16, -h * 1.08], ny = g.y, alpha = 1, r;
       for (var k = 0; k < offs.length; k++) {
         r = { l: g.x - tw / 2, r: g.x + tw / 2 + extra, t: g.y + offs[k] - h / 2, b: g.y + offs[k] + h / 2 };
@@ -368,8 +385,17 @@
       }
       ctx.fillStyle = g.mine ? 'rgba(255,255,255,0.95)' : 'rgba(20,18,40,0.66)';
       Art.rr(ctx, g.x - tw / 2, ny - fs * 0.62, tw, h, fs * 0.62); ctx.fill();
+      if (g.team) {   // 組隊：名牌框成隊伍色
+        ctx.strokeStyle = g.team; ctx.lineWidth = Math.max(2, fs * 0.16);
+        Art.rr(ctx, g.x - tw / 2, ny - fs * 0.62, tw, h, fs * 0.62); ctx.stroke();
+      }
+      if (chip) {
+        ctx.fillStyle = g.team; Art.rr(ctx, g.x - tw / 2, ny - fs * 0.62, cw + fs * 0.2, h, fs * 0.62); ctx.fill();
+        ctx.save(); ctx.font = '900 ' + Math.round(fs * 0.82) + 'px "Baloo 2", "Noto Sans TC", system-ui, sans-serif';
+        ctx.fillStyle = '#fff'; ctx.fillText(chip, g.x - tw / 2 + (cw + fs * 0.2) / 2, ny + 1); ctx.restore();
+      }
       ctx.fillStyle = g.mine ? '#1d1840' : '#fff';
-      ctx.fillText(g.name, g.x, ny + 1);
+      ctx.fillText(g.name, g.x + cw / 2, ny + 1);
       if (g.item) {
         ctx.fillStyle = 'rgba(255,255,255,0.9)'; Art.circle(ctx, g.x + tw / 2 + fs * 0.55, ny, fs * 0.6); ctx.fill();
         Art.drawItemIcon(ctx, g.item, g.x + tw / 2 + fs * 0.55, ny, fs * 0.95);

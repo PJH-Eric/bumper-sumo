@@ -141,7 +141,7 @@
     if (S.online.pendingInvite) showInvitePanel();
     $('game-cv').setAttribute('aria-label', t('game.canvas'));
   }
-  function setLabels(r) { r.labels = { bonk: t('fx.bonk'), clash: t('fx.clash'), whoosh: t('fx.whoosh'), saved: t('fx.saved'), you: t('common.you') }; }
+  function setLabels(r) { r.labels = { bonk: t('fx.bonk'), clash: t('fx.clash'), whoosh: t('fx.whoosh'), saved: t('fx.saved'), you: t('common.you'), ally: t('solo.ally'), foe: t('solo.rival') }; }
 
   /* ====================================================== 首頁 */
   function renderStats() {
@@ -413,8 +413,12 @@
   function updateInsets() {
     var cv = $('game-cv'); if (!cv || !renderer) return;
     var cr = cv.getBoundingClientRect();
-    var pb = $('practice-bar'), pTop = (pb && !pb.hidden) ? pb.getBoundingClientRect().bottom - cr.top + 6 : 0;   // 自由練習的工具列也要讓開
-    if (cr.height < cr.width * 1.1) { renderer.setInsets(pTop && cr.height - pTop >= cr.height * 0.75 ? pTop : 0, 0); return; }   // 橫向：讓開工具列後擂台還夠大才讓（矮手機維持原樣）
+    var pb = $('practice-bar'), pbr = (pb && !pb.hidden) ? pb.getBoundingClientRect() : null;
+    if (cr.height < cr.width * 1.1) {   // 橫向：工具列在右側直欄，擂台只往左挪、大小不變（收合／展開都一樣大）
+      if (pbr && !pb.classList.contains('collapsed')) S.prSideW = pbr.width;   // 記住展開時的寬度：收合時擂台不會跳動
+      renderer.setInsets(0, 0, pbr ? cr.right - pbr.right + Math.max(pbr.width, S.prSideW || 0) + 8 : 0); return;
+    }
+    var pTop = pbr ? pbr.bottom - cr.top + 6 : 0;   // 直向：自由練習的工具列在上方，擂台讓開
     var top = 0, bottom = 0, hb = doc.querySelector('#s-game .hud-top');
     if (hb) top = Math.max(hb.getBoundingClientRect().bottom - cr.top + 4, pTop);
     if (doc.body.classList.contains('touch-on')) {
