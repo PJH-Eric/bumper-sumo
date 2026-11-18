@@ -7,6 +7,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const vm = require('vm');
+const { execFileSync } = require('child_process');
 const { inject, validate } = require('../scripts/inject-seo');
 const root = path.join(__dirname, '..');
 const cfg = JSON.parse(fs.readFileSync(path.join(root, 'seo.config.json'), 'utf8'));
@@ -28,6 +29,28 @@ assert.ok(dicts.en[titleKey] && dicts.en[descKey], '英文 metadata 必須完整
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'game-seo-'));
 try {
   fs.mkdirSync(path.join(temp, 'public'));
+  fs.mkdirSync(path.join(temp, 'public/js'));
+  fs.mkdirSync(path.join(temp, 'scripts'));
+  const configScript = path.join(temp, 'public/js/config.js');
+  const injectServerUrl = path.join(temp, 'scripts/inject-server-url.js');
+  fs.copyFileSync(path.join(root, 'public/js/config.js'), configScript);
+  fs.copyFileSync(path.join(root, 'scripts/inject-server-url.js'), injectServerUrl);
+  const readConfig = url => {
+    const window = { location: new URL(url) };
+    vm.runInNewContext(fs.readFileSync(configScript, 'utf8'), { window, URL });
+    return window.GameConfig;
+  };
+  const runServerInjector = (...args) => execFileSync(process.execPath, [injectServerUrl, ...args], {
+    env: { ...process.env, GAME_SERVER_URL: '' }
+  });
+  assert.equal(readConfig('http://localhost/').source, 'same-origin');
+  runServerInjector('--clear');
+  assert.equal(readConfig(cfg.siteUrl).status, 'unset', '靜態站未設定後端時只能單機');
+  assert.equal(readConfig(cfg.siteUrl + '?server=https://example.com').serverUrl, 'https://example.com', '網址仍可提供測試用後端');
+  runServerInjector('https://example.com');
+  assert.equal(readConfig(cfg.siteUrl).source, 'injected');
+  runServerInjector();
+  assert.equal(readConfig('http://localhost/').source, 'same-origin');
   fs.writeFileSync(path.join(temp, 'seo.config.json'), JSON.stringify(cfg), 'utf8');
   fs.writeFileSync(path.join(temp, 'public/index.html'), source, 'utf8');
   inject(temp, {});

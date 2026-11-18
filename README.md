@@ -52,11 +52,10 @@ public/js/config.js  server URL 唯一入口
 
 見 [.env.example](.env.example)：`PORT`、`HOST`、`GAME_ALLOWED_ORIGIN`、`COUNTDOWN_MS`、`RECONNECT_MS`、`GAME_SERVER_URL`（前端）。
 
-## 部署（已準備、尚未部署）
+## 部署
 
 - 後端：Render（`render.yaml`，region singapore，`/health` 只給平台健康檢查）。
-- 前端：GitHub Pages（`.github/workflows/deploy-pages.yml`）。在 repo 設 Actions variable `GAME_SERVER_URL` = Render 的 HTTPS 網址；Render 的 `GAME_ALLOWED_ORIGIN` 設成 Pages 的來源。
-- 依規劃書：只做本機 commit，不 push、不建立雲端服務。
+- 前端：GitHub Pages（`.github/workflows/deploy-pages.yml`）。未設定後端時，靜態站可玩單機與自由練習。開放線上對戰時，將 Actions variable `GAME_SERVER_URL` 設為 Render 的 HTTPS 網址，並將 Render 的 `GAME_ALLOWED_ORIGIN` 設為 Pages 的來源。
 
 ## 紀錄與成就
 

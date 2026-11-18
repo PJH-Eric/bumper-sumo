@@ -10,9 +10,9 @@
  *   GAME_SERVER_URL=https://cat-dog-war.example node scripts/inject-server-url.js
  *   node scripts/inject-server-url.js https://cat-dog-war.example
  *   node scripts/inject-server-url.js --allow-local http://localhost:3020   （本機測試）
- *   node scripts/inject-server-url.js --clear                               （還原成同源）
+ *   node scripts/inject-server-url.js --clear                               （靜態站僅開放單機）
  *
- * 沒有給值時：清空注入值並正常結束（回到同源／單機）。
+ * 沒有給值且未指定 --clear 時：回到同源。
  * 給了但格式不對：直接失敗，不會靜默回退成 localhost 或寫死的網域。
  */
 'use strict';
@@ -22,7 +22,7 @@ const path = require('path');
 
 const CONFIG = path.join(__dirname, '..', 'public', 'js', 'config.js');
 const BEGIN = '/* GAME_SERVER_URL:BEGIN';
-const LINE = /(\/\* GAME_SERVER_URL:BEGIN[\s\S]*?\*\/\s*\n\s*var INJECTED = )'[^']*'(;)/;
+const LINE = /(\/\* GAME_SERVER_URL:BEGIN[\s\S]*?\*\/\s*\n\s*var INJECTED = )(?:'[^']*'|null)(;)/;
 
 const args = process.argv.slice(2);
 const allowLocal = args.includes('--allow-local');
@@ -61,13 +61,14 @@ if (!source.includes(BEGIN) || !LINE.test(source)) {
 }
 
 if (!raw) {
-  fs.writeFileSync(CONFIG, source.replace(LINE, "$1''$2"), 'utf8');
-  console.log('· 沒有提供 GAME_SERVER_URL，config.js 的注入值已清空（前端會用同源）。');
+  const value = clear ? 'null' : "''";
+  fs.writeFileSync(CONFIG, source.replace(LINE, (_match, before, after) => before + value + after), 'utf8');
+  console.log(clear ? '· 未設定靜態站的後端，前端預設僅開放單機。' : '· 沒有提供 GAME_SERVER_URL，前端會用同源。');
   process.exit(0);
 }
 
 const url = validate(raw);
 if ([39, 92].some((c) => url.indexOf(String.fromCharCode(c)) >= 0)) fail('網址含有不允許的字元：' + url);
 
-fs.writeFileSync(CONFIG, source.replace(LINE, "$1'" + url + "'$2"), 'utf8');
+fs.writeFileSync(CONFIG, source.replace(LINE, (_match, before, after) => before + "'" + url + "'" + after), 'utf8');
 console.log('✓ 已把 server URL 注入 public/js/config.js：' + url);

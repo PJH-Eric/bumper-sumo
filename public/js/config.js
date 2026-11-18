@@ -6,7 +6,7 @@
  *   1. 網址參數 ?server=https://example.com   （臨時覆蓋，方便測 staging 或跨電腦連線）
  *   2. 建置時注入（scripts/inject-server-url.js 會改寫下面 INJECTED 那一行；
  *      GitHub Pages 的自動佈署就是用 repo 變數 GAME_SERVER_URL 注入到這裡）
- *   3. 頁面本身就是伺服器發出來的（http/https 且不是 file://）→ 用同源
+ *   3. 未執行靜態站的 --clear，且頁面是 http/https → 用同源
  *   4. 都不是 → null，代表只能玩單機
  *
  * 規則：必須是 http/https 的絕對網址；頁面走 https 時不接受 http（瀏覽器會擋混合內容）。
@@ -21,7 +21,7 @@
 
   /**
    * 純函式：決定最後要用哪個 server URL。測試直接呼叫這一支。
-   * @param {string} injected      建置時注入的值
+   * @param {string|null} injected 建置時注入的值，null 代表靜態站沒有後端
    * @param {string} queryValue    ?server= 的值
    * @param {string} pageProtocol  'https:' | 'http:' | 'file:'
    * @param {string} pageOrigin    同源回退用的 location.origin
@@ -32,7 +32,7 @@
 
     if (!raw) {
       /* 頁面本來就是伺服器送出來的 → 直接連同一台，這是最常見的情況 */
-      if ((pageProtocol === 'http:' || pageProtocol === 'https:') && pageOrigin) {
+      if (injected !== null && (pageProtocol === 'http:' || pageProtocol === 'https:') && pageOrigin) {
         return { url: String(pageOrigin).replace(/\/+$/, ''), source: 'same-origin', status: 'ok', error: null };
       }
       return { url: null, source: 'none', status: 'unset', error: null };
