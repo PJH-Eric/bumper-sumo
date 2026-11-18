@@ -1161,10 +1161,15 @@
   /* 房間聊天氣泡放在底部按鈕列上方（手機按鈕列可能兩行，高度不固定） */
   function placeRoomChat() {
     var f = doc.querySelector('#s-room .room-foot'); if (!f || !f.offsetHeight) return;
-    /* 按鈕列左邊有空位（例如矮橫向手機，按鈕置中）：氣泡直接放進按鈕列左側，不蓋到席位卡 */
-    var fr = f.getBoundingClientRect(), minLeft = fr.right;
-    f.querySelectorAll('button').forEach(function (b) { var r = b.getBoundingClientRect(); if (r.width) minLeft = Math.min(minLeft, r.left); });
-    var inside = minLeft - fr.left >= 14 + 56 + 16 && f.offsetHeight >= 56;
+    /* 氣泡一律放進按鈕列左側，不蓋到上面的房間設定；左邊沒空位（手機直向按鈕佔滿）就讓按鈕往右讓出位置 */
+    var measure = function () {
+      var fr = f.getBoundingClientRect(), minLeft = fr.right;
+      f.querySelectorAll('button').forEach(function (b) { var r = b.getBoundingClientRect(); if (r.width) minLeft = Math.min(minLeft, r.left); });
+      return minLeft - fr.left >= 14 + 56 + 10 && f.offsetHeight >= 56;
+    };
+    f.classList.remove('rc-dock');
+    var inside = measure();
+    if (!inside && !w.matchMedia(ROOM_CHAT_WIDE).matches) { f.classList.add('rc-dock'); inside = measure(); }
     $('room-chat').style.setProperty('--rc-bottom', (inside ? Math.round((f.offsetHeight - 56) / 2) : f.offsetHeight + 12) + 'px');
   }
   function roomChatVisible() { return w.matchMedia(ROOM_CHAT_WIDE).matches || $('room-chat').classList.contains('open'); }

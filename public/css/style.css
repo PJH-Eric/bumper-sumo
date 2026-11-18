@@ -287,6 +287,8 @@ svg { stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round
 .seat .host-crown { position: absolute; top: 6px; left: 8px; color: var(--yellow); font-weight: 900; font-size: .8rem; }
 .invite-box { padding: 10px 12px; border-radius: 12px; background: #160f38; font-family: ui-monospace, monospace; font-size: .85rem; overflow-wrap: anywhere; user-select: all; }
 .room-foot .go-btn { min-width: 180px; }
+.room-foot.rc-dock { padding-left: calc(84px + var(--safe-l)); }   /* 讓出左邊給聊天氣泡 */
+.room-foot.rc-dock .go-btn { min-width: 0; flex: 1 1 140px; }
 /* ---------- 房間聊天（左下） ---------- */
 .room-chat { position: absolute; z-index: 20; left: calc(14px + var(--safe-l)); bottom: var(--rc-bottom, calc(92px + var(--safe-b))); pointer-events: none; }
 .room-chat > * { pointer-events: auto; }
