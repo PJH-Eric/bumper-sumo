@@ -18,13 +18,16 @@
     mask = null;
     background.forEach(function (entry) { entry[0].inert = entry[1]; });
     background = [];
-    document.removeEventListener('keydown', onKey, true);
+    w.removeEventListener('keydown', onKey, true);
     if (previousFocus && previousFocus.isConnected) previousFocus.focus();
   }
 
   function onKey(event) {
-    if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); close(); }
-    else if (event.key === 'Tab') { event.preventDefault(); mask.querySelector('button').focus(); }
+    if (event.key !== 'Escape' && event.key !== 'Tab') return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.key === 'Escape') close();
+    else mask.querySelector('button').focus();
   }
 
   function show() {
@@ -58,7 +61,8 @@
       node.inert = true;
     });
     document.body.appendChild(mask);
-    document.addEventListener('keydown', onKey, true);
+    // 先於文件層的共用彈窗處理器，避免一併關閉底下的視窗。
+    w.addEventListener('keydown', onKey, true);
     button.focus();
   }
 

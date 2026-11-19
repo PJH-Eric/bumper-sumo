@@ -1,14 +1,3 @@
-:root {
-  --outage-bg: var(--cream);
-  --outage-ink: var(--ink);
-  --outage-edge: var(--gold);
-  --outage-accent: var(--gold);
-  --outage-button-ink: var(--ink);
-  --outage-radius: 6px;
-  --outage-button-radius: 6px;
-  --outage-shadow: 8px 8px 0 var(--red);
-}
-/* Tokens below are supplied by each game's existing visual system. */
 .server-outage-mask {
   position: fixed;
   inset: 0;
@@ -16,25 +5,24 @@
   display: grid;
   place-items: center;
   padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
-  background: rgb(0 0 0 / 65%);
+  background: rgb(10 6 30 / 66%);
   touch-action: manipulation;
 }
 .server-outage-panel {
   box-sizing: border-box;
   width: min(100%, 440px);
   padding: clamp(18px, 4vw, 30px);
-  color: var(--outage-ink);
-  background: var(--outage-bg);
-  border: 3px solid var(--outage-edge);
-  border-radius: var(--outage-radius);
-  box-shadow: var(--outage-shadow);
+  color: var(--text);
+  background: linear-gradient(var(--panel2), var(--panel)) var(--panel);
+  border-radius: 24px;
+  box-shadow: 0 8px 0 #160f3a, inset 0 0 0 3px rgb(255 233 163 / 25%);
   font-family: inherit;
   text-align: center;
   overflow-wrap: anywhere;
 }
 .server-outage-panel h2 {
   margin: 0 0 12px;
-  color: inherit;
+  color: var(--yellow);
   font: inherit;
   font-size: clamp(20px, 5vw, 26px);
   font-weight: 900;
@@ -45,6 +33,7 @@
   color: inherit;
   font-size: 16px;
   line-height: 1.7;
+  text-wrap: balance;
 }
 .server-outage-button {
   appearance: none;
@@ -53,18 +42,18 @@
   min-height: 48px;
   max-width: 100%;
   padding: 10px 22px;
-  color: var(--outage-button-ink);
-  background: var(--outage-accent);
-  border: 2px solid var(--outage-edge);
-  border-radius: var(--outage-button-radius);
-  box-shadow: 0 4px 0 var(--outage-edge);
+  color: var(--ink);
+  background: var(--yellow);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 0 var(--yellow-d);
   font: inherit;
   font-weight: 900;
   line-height: 1.4;
   cursor: pointer;
 }
-.server-outage-button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--outage-edge); }
-.server-outage-button:focus-visible { outline: 3px solid var(--outage-ink); outline-offset: 5px; }
+.server-outage-button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--yellow-d); }
+.server-outage-button:focus-visible { outline: 3px solid var(--text); outline-offset: 5px; }
 @media (max-height: 420px) {
   .server-outage-panel { padding: 16px 20px; }
   .server-outage-panel h2 { margin-bottom: 8px; }

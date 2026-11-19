@@ -297,11 +297,22 @@ async function main() {
   await offline.click('#btn-online');
   await offline.waitForFunction(() => window.BumperNet.status() === 'error');
   ok(!(await offline.isVisible('#server-outage-message')), '連線剛失敗時先保留大廳提示');
+  await offline.click('#btn-settings');
+  await offline.waitForFunction(() => document.activeElement.closest('#m-settings'));
+  const settingsFocus = await offline.evaluate(() => document.activeElement.id);
   await offline.clock.fastForward(30001);
   await offline.locator('#server-outage-message').waitFor();
   ok((await offline.textContent('#server-outage-message')).includes('稍後再試'), '連線逾時提示提供可用的下一步');
+  ok(await offline.evaluate(() => {
+    const panel = getComputedStyle(document.querySelector('.server-outage-panel'));
+    const button = getComputedStyle(document.querySelector('.server-outage-button'));
+    const transparent = 'rgba(0, 0, 0, 0)';
+    return panel.backgroundColor !== transparent && button.backgroundColor !== transparent && button.backgroundColor !== panel.backgroundColor;
+  }), '斷線提示的面板和按鈕都有實色背景');
   await offline.keyboard.press('Escape');
   ok(!(await offline.isVisible('#server-outage-message')), 'Escape 可關閉斷線提示');
+  ok(await offline.isVisible('#m-settings') && await offline.evaluate(() => document.activeElement.id) === settingsFocus, '關閉斷線提示後仍可繼續操作原本的設定彈窗');
+  await offline.keyboard.press('Escape');
   await offline.click('#s-lobby .back-btn');
   await offline.clock.fastForward(30001);
   ok(!(await offline.isVisible('#server-outage-message')), '離開線上模式後斷線提示不會再彈出');
