@@ -12,10 +12,10 @@
     emitLocal('status', Object.assign({ status: s }, extra || {}));
   }
 
-  function loadLib() {
+  function loadLib(base) {
     if (root.io) return Promise.resolve();
     if (loading) return loading;
-    var url = root.GameConfig.url('/socket.io/socket.io.js');
+    var url = base + '/socket.io/socket.io.js';
     loading = new Promise(function (res, rej) {
       var s = document.createElement('script');
       s.src = url; s.async = true;
@@ -41,9 +41,12 @@
       if (socket) { if (!socket.connected) socket.connect(); return Promise.resolve(); }
       var attempt = ++connectionAttempt;
       setStatus('connecting');
-      return loadLib().then(function () {
+      var selected = root.GameBackend?.select(root.GameConfig.serverUrl) ?? root.GameConfig.serverUrl;
+      return Promise.resolve(selected).then(async function (base) {
         if (attempt !== connectionAttempt) return;
-        socket = root.io(root.GameConfig.serverUrl, { transports: ['websocket', 'polling'], reconnectionDelay: 800, reconnectionDelayMax: 4000, timeout: 20000 });
+        await loadLib(base);
+        if (attempt !== connectionAttempt) return;
+        socket = root.io(base, { transports: ['websocket', 'polling'], reconnectionDelay: 800, reconnectionDelayMax: 4000, timeout: 20000 });
         if (root.NetworkLatency && root.NetworkLatency.bindSocketIo) root.NetworkLatency.bindSocketIo(socket);
         /* 任何訊息都算活著；超過 5 秒沒消息就判定斷線並重連 */
         socket.onAny(function () { lastMsg = Date.now(); });

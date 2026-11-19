@@ -1258,7 +1258,12 @@
     if (atBottom) chatSA.toBottom(); else chatSA.update();
   }
   function mySeat() { var r = S.online.room; if (!r) return null; return r.seats.filter(function (s) { return s.kind === 'human' && s.sid === S.online.sid; })[0] || null; }
-  function inviteUrl() { var r = S.online.room; return r && r.invite ? w.GameConfig.inviteUrl(r.code, r.invite) : ''; }
+  function inviteUrl() {
+    var r = S.online.room;
+    if (!r || !r.invite) return '';
+    var address = w.GameConfig.inviteUrl(r.code, r.invite);
+    return window.GameBackend?.pinInvite(address) ?? address;
+  }
   function selectInvite() { var e = $('room-invite-url'); var rg = doc.createRange(); rg.selectNodeContents(e); var sel = w.getSelection(); sel.removeAllRanges(); sel.addRange(rg); UI.toast(t('share.selectManual')); }
   function renderRoom() {
     var room = S.online.room;
