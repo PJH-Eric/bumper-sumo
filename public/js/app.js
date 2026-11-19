@@ -429,7 +429,16 @@
     if (hb) top = Math.max(hb.getBoundingClientRect().bottom - cr.top + 4, pTop);
     if (doc.body.classList.contains('touch-on')) {
       var lowest = cr.bottom;
-      ['.tbtns', '.joy-base'].forEach(function (sel) { var e = doc.querySelector('#s-game ' + sel); if (e) { var r = e.getBoundingClientRect(); if (r.height) lowest = Math.min(lowest, r.top); } });
+      var tb = doc.querySelector('#s-game .tbtns');
+      if (tb) { var tr = tb.getBoundingClientRect(); if (tr.height) lowest = Math.min(lowest, tr.top); }
+      /* 搖桿是浮動的（跟著手指走）：只用「放開時的停靠位置」計算保留區，
+         否則手指往上推時保留區跟著變大，擂台會一直放大縮小 */
+      var joy = $('joy'), jb = doc.querySelector('#s-game .joy-base');
+      if (joy && jb && !joy.classList.contains('active')) {
+        var jr = jb.getBoundingClientRect();
+        if (jr.height) S.joyRestGap = cr.bottom - jr.top;   // 記住離畫布底部的距離（畫布尺寸改變時仍適用）
+      }
+      if (S.joyRestGap) lowest = Math.min(lowest, cr.bottom - S.joyRestGap);
       bottom = cr.bottom - lowest + 6;
     }
     renderer.setInsets(top, bottom);
