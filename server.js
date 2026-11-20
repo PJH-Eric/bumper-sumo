@@ -12,6 +12,7 @@
  *   COUNTDOWN_MS         開局倒數（毫秒），預設 3000
  *   RECONNECT_MS         斷線可重連時間（毫秒），預設 10000
  *   AI_SPEED_SCALE       自動化測試用：電腦反應時間倍率
+ *   BUMPER_ROOM_DB_PATH  啟用房間 SQLite 復原的檔案路徑
  */
 'use strict';
 
@@ -55,7 +56,10 @@ const io = new Server(server, {
   pingInterval: 20000, pingTimeout: 25000, maxHttpBufferSize: 1e5
 });
 
-const hub = new Hub(io);
+const checkpoints = process.env.BUMPER_ROOM_DB_PATH
+  ? require('./lib/room-checkpoints.js').openCheckpoints(process.env.BUMPER_ROOM_DB_PATH)
+  : null;
+const hub = new Hub(io, checkpoints);
 hub.lobbyChat = require('./lib/lobby-chat.js').attachSocketIo(io);
 
 function safe(fn) {
@@ -107,7 +111,7 @@ server.on('error', (e) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log('碰碰車大亂鬥 伺服器啟動：http://localhost:' + PORT);
+  console.log('碰碰車大亂鬥 伺服器啟動：http://localhost:' + server.address().port);
   if (process.env.QUIET_BANNER) return;
   const nets = os.networkInterfaces();
   for (const list of Object.values(nets)) for (const n of list || []) {

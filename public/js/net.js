@@ -4,6 +4,8 @@
   var socket = null, loading = null, handlers = {}, status = 'idle', sid = null;
   var lastMsg = 0, watchdog = null, pinger = null, rtt = 0, connectionAttempt = 0;
   var SID_KEY = 'bumper-sumo:v1:sid';
+  var RESUME_KEY = 'bumper-sumo:v1:resume';
+  var resumeKey = null;
 
   function emitLocal(evt, data) { (handlers[evt] || []).forEach(function (fn) { try { fn(data); } catch (e) { console.error(e); } }); }
   function setStatus(s, extra) {
@@ -28,6 +30,14 @@
 
   function getSid() { try { return root.sessionStorage.getItem(SID_KEY) || null; } catch (e) { return null; } }
   function saveSid(v) { try { root.sessionStorage.setItem(SID_KEY, v); } catch (e) { /* 無痕 */ } }
+  function getResumeKey() { try { return root.sessionStorage.getItem(RESUME_KEY); } catch (e) { return null; } }
+  function saveResumeKey(v) {
+    resumeKey = v || null;
+    try {
+      if (resumeKey) root.sessionStorage.setItem(RESUME_KEY, resumeKey);
+      else root.sessionStorage.removeItem(RESUME_KEY);
+    } catch (e) { /* 無痕 */ }
+  }
 
   var Net = {
     on: function (evt, fn) { (handlers[evt] || (handlers[evt] = [])).push(fn); },
@@ -63,8 +73,8 @@
         }, 2000);
         socket.on('connect', function () {
           lastMsg = Date.now();
-          socket.emit('hello', { sid: sid || getSid(), name: profile().name, skin: profile().skin }, function (r) {
-            if (r && r.ok) { sid = r.sid; saveSid(sid); }
+          socket.emit('hello', { sid: sid || getSid(), resumeKey: resumeKey || getResumeKey(), name: profile().name, skin: profile().skin }, function (r) {
+            if (r && r.ok) { sid = r.sid; saveSid(sid); saveResumeKey(r.resumeKey); }
             setStatus('connected', { room: r && r.room, online: r && r.online });
           });
         });

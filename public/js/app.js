@@ -1350,7 +1350,14 @@
     $('room-spectate').disabled = room.phase !== 'waiting' || (!me && room.seats.filter(function (s) { return s.open && s.kind === 'empty'; }).length === 0);
     if (room.phase === 'playing' && S.screen === 'room' && S.match) show('game');
   }
-  function setRoomMarker(on) { try { if (on) w.sessionStorage.setItem('bumper-sumo:v1:inroom', '1'); else w.sessionStorage.removeItem('bumper-sumo:v1:inroom'); } catch (e) { /* 無痕 */ } }
+  function setRoomMarker(on) {
+    try {
+      if (on) w.sessionStorage.setItem('bumper-sumo:v1:inroom', '1');
+      else w.sessionStorage.removeItem('bumper-sumo:v1:inroom');
+    } catch (e) { /* 無痕 */ }
+    if (on) w.GameBackend?.rememberRoom?.();
+    else w.GameBackend?.forgetRoom?.();
+  }
   function leaveRoom(toHome) {
     setRoomMarker(false);
     Net.send('room:leave').then(function () {
@@ -1429,6 +1436,7 @@
     if (S.online.room) S.online.room.phase = 'waiting';
   }
   function onlineFrame(now, dt) {
+    if (S.online.room?.recovering) return;
     var m = S.match;
     var me = R.getCar(m, S.myId);
     var input = Input.read();
