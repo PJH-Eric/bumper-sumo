@@ -7,18 +7,23 @@ const path = require('path');
 const http = require('http');
 const { io } = require('socket.io-client');
 
-const PORT = 3291;
-const URL = 'http://localhost:' + PORT;
+let url;
+const sockets = new Set();
 let pass = 0, fail = 0;
 function ok(c, name) { if (c) pass++; else { fail++; console.log('✗ ' + name); } }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function client(lagMs) {
-  const s = io(URL, { transports: ['websocket'], forceNew: true, reconnection: false });
+  const s = io(url, { transports: ['websocket'], forceNew: true, reconnection: false, timeout: 5000 });
+  sockets.add(s);
   const c = { s, states: [], room: null, events: {}, sid: null, init: null, over: null, closed: false, online: null };
   const orig = s.emit.bind(s);
   /* 模擬單向延遲：送出前先等 lagMs */
-  c.emit = (evt, p) => new Promise((res) => setTimeout(() => orig(evt, p, (r) => setTimeout(() => res(r), lagMs || 0)), lagMs || 0));
+  c.emit = (evt, p) => new Promise((resolve, reject) => {
+    setTimeout(() => s.timeout(8000).emit(evt, p, (error, response) => {
+      setTimeout(() => error ? reject(error) : resolve(response), lagMs || 0);
+    }), lagMs || 0);
+  });
   c.input = (p) => setTimeout(() => orig('game:input', p), lagMs || 0);
   s.on('room:state', (r) => { c.room = r; });
   s.on('game:init', (g) => { c.init = g; c.over = null; });
@@ -27,21 +32,28 @@ function client(lagMs) {
   s.on('room:closed', () => { c.closed = true; });
   s.on('room:kicked', () => { c.kicked = true; });
   s.on('online:count', (p) => { c.online = p.n; });
-  return new Promise((res) => s.on('connect', () => res(c)));
+  return new Promise((resolve, reject) => {
+    s.once('connect', () => resolve(c));
+    s.once('connect_error', reject);
+  });
 }
 async function hello(c, name, sid) { const r = await c.emit('hello', { name, sid, skin: 0 }); c.sid = r.sid; return r; }
 async function waitFor(fn, ms, step) { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (fn()) return true; await sleep(step || 30); } return false; }
-function get(p) { return new Promise((res) => http.get(URL + p, (r) => { let b = ''; r.on('data', (d) => { b += d; }); r.on('end', () => res({ status: r.statusCode, body: b })); }).on('error', () => res({ status: 0 }))); }
+function get(p) { return new Promise((res) => http.get(url + p, (r) => { let b = ''; r.on('data', (d) => { b += d; }); r.on('end', () => res({ status: r.statusCode, body: b })); }).on('error', () => res({ status: 0 }))); }
 
 async function main() {
   const srv = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
-    env: Object.assign({}, process.env, { PORT: String(PORT), COUNTDOWN_MS: '300', RECONNECT_MS: '1200', MATCH_SECONDS: '6', AI_SPEED_SCALE: '1' }),
+    env: { ...process.env, PORT: '0', HOST: '127.0.0.1', COUNTDOWN_MS: '300', RECONNECT_MS: '1200', MATCH_SECONDS: '6', AI_SPEED_SCALE: '1' },
     stdio: ['ignore', 'pipe', 'pipe']
   });
   let log = '';
   srv.stdout.on('data', (d) => { log += d; }); srv.stderr.on('data', (d) => { log += d; });
-  await waitFor(() => /伺服器啟動/.test(log), 8000);
   try {
+    const listening = /http:\/\/localhost:(\d+)/;
+    await waitFor(() => listening.test(log) || srv.exitCode !== null, 8000);
+    const port = log.match(listening)?.[1];
+    if (!port) throw new Error('測試伺服器啟動失敗\n' + log);
+    url = 'http://127.0.0.1:' + port;
     ok((await get('/health')).status === 200, '/health 可用（平台健康檢查）');
     ok((await get('/api/presence')).status === 404, '沒有 /api/presence');
 
@@ -159,9 +171,8 @@ async function main() {
     const m1 = await F.emit('chat:send', { text: '<b>嗨</b>' });
     ok(m1.ok, '房間聊天送出');
     ok((await F.emit('chat:send', { text: '再一次' })).code === 'fast', '聊天頻率限制');
-
-    [A, B, C, D, E, F, B2].forEach((c) => c.s.disconnect());
   } finally {
+    for (const socket of sockets) socket.disconnect();
     srv.kill();
   }
   console.log((fail ? '✗' : '✓') + ' 線上流程 ' + pass + ' 項通過' + (fail ? '，' + fail + ' 項失敗' : ''));
